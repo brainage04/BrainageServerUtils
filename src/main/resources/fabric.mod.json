@@ -15,14 +15,8 @@
 	"icon": "assets/brainageserverutils/icon.png",
 	"environment": "*",
 	"entrypoints": {
-		"client": [
+		"main": [
 			"com.github.brainage04.brainageserverutils.BrainageServerUtils"
-		],
-		"fabric-datagen": [
-			"com.github.brainage04.brainageserverutils.datagen.DataGenerator"
-		],
-		"modmenu": [
-			"com.github.brainage04.brainageserverutils.modmenu.ModMenuIntegration"
 		]
 	},
 	"mixins": [
