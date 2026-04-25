@@ -1,19 +1,18 @@
 # About
-My template for Minecraft Fabric client-side mods. The easiest way to use this is to click `Use this template` and GitHub Actions will take care of the rest for you.
 
-However, if you are using a Linux-based operating system, it is possible to clone this repository, and perform a refactor by triggering the `init.sh` script like so:
-```shell
-./init.sh <owner> <mod_name> 
-```
+A Minecraft Fabric server-side mod that adds some useful/fun gamerules to Minecraft.
 
-Where `<owner>` is your GitHub username and `<mod_name>` is your GitHub repository name/mod name.
+todo: list new gamerules here
 
-This script is designed to work both with GitHub Actions and manual usage, and will safely delete:
-  - Leftover unused folders that are not tracked by Git (src/main/java/com/example and src/main/resources/examplemod).
-  - The `init` workflow and script after successful execution.
+# Todo
 
-# Credits
-Thank you to [nea89o](https://github.com/nea89o)
-for developing the GitHub Actions [workflow](https://github.com/nea89o/Forge1.8.9Template/blob/master/.github/workflows/init.yml)
-and [script](https://github.com/nea89o/Forge1.8.9Template/blob/master/make-my-own.sh)
-from which I based my workflow and script off of.
+Make effects tick but also decrease in duration 10x faster
+
+- Fire
+- Freeze
+- Drowning
+- Positive/Negative Potion Effects
+
+Make hunger/saturation/natural regen tick 10x faster
+
+Fix Powder Snow Bucket not working with bucket gamerule

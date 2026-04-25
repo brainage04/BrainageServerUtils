@@ -1,22 +1,31 @@
 package com.github.brainage04.brainageserverutils;
 
 import com.github.brainage04.brainageserverutils.command.core.ModCommands;
-
+import com.github.brainage04.brainageserverutils.event.ModEvents;
+import com.github.brainage04.brainageserverutils.gamerule.ModGameRules;
+import com.github.brainage04.brainageserverutils.listener.ServerTickListener;
+import com.github.brainage04.brainageserverutils.util.PotionSyncTicker;
+import com.github.brainage04.brainageserverutils.util.RunnableScheduler;
 import net.fabricmc.api.ModInitializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class BrainageServerUtils implements ModInitializer {
-	public static final String MOD_ID = "brainageserverutils";
-	public static final String MOD_NAME = "BrainageServerUtils";
-	public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
+    public static final String MOD_ID = "brainageserverutils";
+    public static final String MOD_NAME = "BrainageServerUtils";
+    public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
 
-	@Override
-	public void onInitialize() {
-		LOGGER.info("{} initialising...", MOD_NAME);
+    @Override
+    public void onInitialize() {
+        LOGGER.info("{} initialising...", MOD_NAME);
 
-		ModCommands.initialize();
+        ModCommands.initialize();
+        ModGameRules.initialize();
+        ModEvents.initialize();
+        ServerTickListener.initialize();
+        PotionSyncTicker.initialize();
+        RunnableScheduler.initialize();
 
-		LOGGER.info("{} initialised.", MOD_NAME);
-	}
+        LOGGER.info("{} initialised.", MOD_NAME);
+    }
 }

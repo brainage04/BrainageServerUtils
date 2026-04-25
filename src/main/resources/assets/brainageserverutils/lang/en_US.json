@@ -1,0 +1,5 @@
+{
+  "gamerule.disableDurability": "Disable Durability",
+  "gamerule.disableItemDecrement": "Disable Item Decrement",
+  "gamerule.disableInvincibilityFrames": "Disable Invincibility Frames"
+}

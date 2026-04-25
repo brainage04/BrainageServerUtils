@@ -1,20 +1,23 @@
-package com.github.brainage04.brainageserverutils.command;
+package com.github.brainage04.brainageserverutils.command.setup;
 
+import com.github.brainage04.brainageserverutils.util.PlayerUtils;
 import com.mojang.brigadier.CommandDispatcher;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.Text;
 
 import static net.minecraft.server.command.CommandManager.literal;
 
-public class ExampleCommand {
+public class UpdatePlayerHotbarCommand {
     public static int execute(ServerCommandSource source) {
-        source.sendFeedback(() -> Text.literal("This is an example command."), false);
+        PlayerUtils.updateHotbar(source.getPlayer());
+
+        source.sendFeedback(() -> Text.literal("Updated player hotbar."), false);
 
         return 1;
     }
 
     public static void initialize(CommandDispatcher<ServerCommandSource> dispatcher) {
-        dispatcher.register(literal("example")
+        dispatcher.register(literal("updateplayerhotbar")
                 .executes(context ->
                         execute(
                                 context.getSource()

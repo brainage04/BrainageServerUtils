@@ -82,5 +82,11 @@ loom {
         }
     }
 
+    runs {
+        server {
+            vmArgs "-Ddisable.watchdog=true"
+        }
+    }
+
 	accessWidenerPath = file("src/main/resources/brainageserverutils.accesswidener")
 }
