@@ -1,0 +1,6 @@
+{
+  "gamerule.brainageserverutils.disable_durability": "Disable Durability",
+  "gamerule.brainageserverutils.disable_item_decrement": "Disable Item Decrement",
+  "gamerule.brainageserverutils.disable_bucket_decrement": "Disable Bucket Decrement",
+  "gamerule.brainageserverutils.instant_consume": "Instant Consumption"
+}

@@ -2,37 +2,34 @@ package com.github.brainage04.brainageserverutils.mixin.item;
 
 import com.github.brainage04.brainageserverutils.gamerule.ModGameRules;
 import com.github.brainage04.brainageserverutils.util.PlayerUtils;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemUsage;
-import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.world.GameRules;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.ItemUtils;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 
-@Mixin(ItemUsage.class)
+@Mixin(ItemUtils.class)
 public class MixinItemUsage {
     @Redirect(
-            method = "exchangeStack(Lnet/minecraft/item/ItemStack;Lnet/minecraft/entity/player/PlayerEntity;Lnet/minecraft/item/ItemStack;Z)Lnet/minecraft/item/ItemStack;",
+            method = "createFilledResult(Lnet/minecraft/world/item/ItemStack;Lnet/minecraft/world/entity/player/Player;Lnet/minecraft/world/item/ItemStack;Z)Lnet/minecraft/world/item/ItemStack;",
             at = @At(
                     value = "INVOKE",
-                    target = "Lnet/minecraft/entity/player/PlayerEntity;isInCreativeMode()Z"
+                    target = "Lnet/minecraft/world/entity/player/Player;hasInfiniteMaterials()Z"
             )
     )
-    private static boolean exchangeStack$injected(
-            PlayerEntity instance
-    ) {
-        MinecraftServer server = instance.getServer();
-        if (server == null) return instance.isInCreativeMode();
+    private static boolean createFilledResult$injected(Player player) {
+        if (!(player.level() instanceof ServerLevel level)
+                || !level.getGameRules().get(ModGameRules.DISABLE_BUCKET_DECREMENT)) {
+            return player.hasInfiniteMaterials();
+        }
 
-        GameRules gameRules = server.getGameRules();
-        if (gameRules.getBoolean(ModGameRules.DISABLE_BUCKET_DECREMENT)) {
-            if (instance instanceof ServerPlayerEntity player) {
-                PlayerUtils.updateHotbar(player);
-            }
+        if (player instanceof ServerPlayer serverPlayer) {
+            PlayerUtils.updateHotbar(serverPlayer);
+        }
 
-            return true;
-        } else return instance.isInCreativeMode();
+        return true;
     }
 }

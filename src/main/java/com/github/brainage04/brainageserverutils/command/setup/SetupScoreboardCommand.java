@@ -1,75 +1,45 @@
 package com.github.brainage04.brainageserverutils.command.setup;
 
 import com.mojang.brigadier.CommandDispatcher;
-import net.minecraft.scoreboard.Scoreboard;
-import net.minecraft.scoreboard.ScoreboardCriterion;
-import net.minecraft.scoreboard.ScoreboardDisplaySlot;
-import net.minecraft.scoreboard.ScoreboardObjective;
-import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.text.Text;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.network.chat.Component;
+import net.minecraft.server.ServerScoreboard;
+import net.minecraft.world.scores.DisplaySlot;
+import net.minecraft.world.scores.Objective;
+import net.minecraft.world.scores.criteria.ObjectiveCriteria;
 
-import static net.minecraft.server.command.CommandManager.literal;
+import static net.minecraft.commands.Commands.literal;
 
-public class SetupScoreboardCommand {
-    public static int execute(ServerCommandSource source) {
-        source.sendFeedback(() -> Text.literal("Setting up scoreboard..."), true);
+public final class SetupScoreboardCommand {
+    private SetupScoreboardCommand() {
+    }
 
-        Scoreboard scoreboard = source.getServer().getScoreboard();
-
-        ScoreboardObjective health = scoreboard.getNullableObjective("Health");
-        if (health == null) {
-            scoreboard.addObjective(
-                    "Health",
-                    ScoreboardCriterion.HEALTH,
-                    Text.literal("Health"),
-                    ScoreboardCriterion.RenderType.INTEGER,
-                    true,
-                    null
-            );
-        } else {
-            scoreboard.setObjectiveSlot(ScoreboardDisplaySlot.LIST, health);
-        }
-
-        ScoreboardObjective deaths = scoreboard.getNullableObjective("Deaths");
-        if (deaths == null) {
-             scoreboard.addObjective(
-                     "Deaths",
-                     ScoreboardCriterion.DEATH_COUNT,
-                     Text.literal("Deaths"),
-                     ScoreboardCriterion.RenderType.INTEGER,
-                     true,
-                     null
-            );
-        } else {
-            scoreboard.setObjectiveSlot(ScoreboardDisplaySlot.SIDEBAR, deaths);
-        }
-
-        ScoreboardObjective kills = scoreboard.getNullableObjective("Kills");
-        if (kills == null) {
-            scoreboard.addObjective(
-                    "Kills",
-                    ScoreboardCriterion.PLAYER_KILL_COUNT,
-                    Text.literal("Kills"),
-                    ScoreboardCriterion.RenderType.INTEGER,
-                    true,
-                    null
-            );
-        } else {
-            scoreboard.setObjectiveSlot(ScoreboardDisplaySlot.SIDEBAR, kills);
-        }
-
-        source.sendFeedback(() -> Text.literal("Scoreboard set up."), true);
-
+    public static int execute(CommandSourceStack source) {
+        source.sendSuccess(() -> Component.literal("Setting up scoreboard..."), true);
+        ServerScoreboard scoreboard = source.getServer().getScoreboard();
+        setupObjective(scoreboard, "Health", ObjectiveCriteria.HEALTH, DisplaySlot.BELOW_NAME);
+        setupObjective(scoreboard, "Deaths", ObjectiveCriteria.DEATH_COUNT, DisplaySlot.LIST);
+        setupObjective(scoreboard, "Kills", ObjectiveCriteria.KILL_COUNT_PLAYERS, DisplaySlot.SIDEBAR);
+        source.sendSuccess(() -> Component.literal("Scoreboard set up."), true);
         return 1;
     }
 
-    public static void initialize(CommandDispatcher<ServerCommandSource> dispatcher) {
-        dispatcher.register(literal("setupscoreboard")
-                .executes(context ->
-                        execute(
-                                context.getSource()
-                        )
-                )
-        );
+    private static void setupObjective(ServerScoreboard scoreboard, String name, ObjectiveCriteria criterion, DisplaySlot displaySlot) {
+        Objective objective = scoreboard.getObjective(name);
+        if (objective == null) {
+            objective = scoreboard.addObjective(
+                    name,
+                    criterion,
+                    Component.literal(name),
+                    ObjectiveCriteria.RenderType.INTEGER,
+                    true,
+                    null
+            );
+        }
+        scoreboard.setDisplayObjective(displaySlot, objective);
+    }
+
+    public static void initialize(CommandDispatcher<CommandSourceStack> dispatcher) {
+        dispatcher.register(literal("setupscoreboard").executes(context -> execute(context.getSource())));
     }
 }

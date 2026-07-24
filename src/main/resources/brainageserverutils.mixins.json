@@ -3,19 +3,11 @@
   "package": "com.github.brainage04.brainageserverutils.mixin",
   "compatibilityLevel": "JAVA_21",
   "mixins": [
-    "entity.MixinEntity",
-    "entity.MixinLivingEntity",
     "entity.MixinPersistentProjectileEntity",
-    "item.MixinBowItem",
     "item.MixinConsumableComponent",
-    "item.MixinCrossbowItem",
     "item.MixinEnchantmentHelper",
     "item.MixinItemStack",
-    "item.MixinItemUsage",
-    "item.MixinTridentItem",
-    "potion.MixinPoisonStatusEffect",
-    "potion.MixinStatusEffectInstance",
-    "potion.MixinWitherStatusEffect"
+    "item.MixinItemUsage"
   ],
   "injectors": {
     "defaultRequire": 1

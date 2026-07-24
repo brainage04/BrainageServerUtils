@@ -7,91 +7,74 @@ import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.BoolArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.Commands;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.command.CommandManager;
-import net.minecraft.server.command.GameRuleCommand;
-import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.world.GameRules;
+import net.minecraft.world.level.gamerules.GameRule;
+import net.minecraft.world.level.gamerules.GameRules;
 
-import static net.minecraft.server.command.CommandManager.argument;
-import static net.minecraft.server.command.CommandManager.literal;
+import java.util.Map;
 
-// modified version of GameRuleCommand
-// only includes gamerules registered with this mod
-public class BrainageGameRuleCommand {
-    public static void initialize(CommandDispatcher<ServerCommandSource> dispatcher) {
-        final LiteralArgumentBuilder<ServerCommandSource> root =
-                literal("brainagegamerule").requires(CommandManager.requirePermissionLevel(2));
+import static net.minecraft.commands.Commands.argument;
+import static net.minecraft.commands.Commands.literal;
 
-        for (GameRules.Key<?> key : ModGameRules.REGISTERED) {
-            addRuleSubcommand(root, key);
-        }
+public final class BrainageGameRuleCommand {
+    private static final Map<String, GameRule<Boolean>> RULES = Map.of(
+            "disableDurability", ModGameRules.DISABLE_DURABILITY,
+            "disableItemDecrement", ModGameRules.DISABLE_ITEM_DECREMENT,
+            "disableBucketDecrement", ModGameRules.DISABLE_BUCKET_DECREMENT,
+            "instantConsume", ModGameRules.INSTANT_CONSUME
+    );
 
-        // add mass set/query commands
+    private BrainageGameRuleCommand() {
+    }
+
+    public static void initialize(CommandDispatcher<CommandSourceStack> dispatcher) {
+        LiteralArgumentBuilder<CommandSourceStack> root = literal("brainagegamerule")
+                .requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS));
+        RULES.forEach((name, rule) -> addRuleSubcommand(root, name, rule));
         root.then(literal("all")
-                .executes(ctx -> executeMassQuery(ctx.getSource()))
+                .executes(context -> executeMassQuery(context.getSource()))
                 .then(argument("value", BoolArgumentType.bool())
-                        .executes(BrainageGameRuleCommand::executeMassSet)
-                )
-        );
-
+                        .executes(BrainageGameRuleCommand::executeMassSet)));
         dispatcher.register(root);
     }
 
-    private static void sendQueryTitle(ServerCommandSource source) {
+    private static void sendQueryTitle(CommandSourceStack source) {
         FeedbackUtils.sendFeedback(source, "%s gamerules:".formatted(BrainageServerUtils.MOD_NAME));
     }
 
-    private static void executeQuery(ServerCommandSource source, GameRules.Key<?> key, GameRules rules) {
-        GameRules.Rule<?> rule = rules.get(key);
-
-        String feedback = " - %s: %s".formatted(key.getName(), rule.toString());
-
-        FeedbackUtils.sendFeedback(source, feedback);
+    private static void executeQuery(CommandSourceStack source, String name, GameRule<Boolean> rule, GameRules rules) {
+        FeedbackUtils.sendFeedback(source, " - %s: %s".formatted(name, rules.getAsString(rule)));
     }
 
-    private static int executeMassQuery(ServerCommandSource source) {
-        MinecraftServer server = source.getServer();
-        GameRules rules = server.getGameRules();
-
+    private static int executeMassQuery(CommandSourceStack source) {
+        GameRules rules = source.getServer().getGameRules();
         sendQueryTitle(source);
-
-        for (GameRules.Key<?> key : ModGameRules.REGISTERED) {
-            executeQuery(source, key, rules);
-        }
-
+        RULES.forEach((name, rule) -> executeQuery(source, name, rule, rules));
         return 1;
     }
 
-    private static int executeMassSet(CommandContext<ServerCommandSource> ctx) {
-        ServerCommandSource source = ctx.getSource();
+    private static int executeMassSet(CommandContext<CommandSourceStack> context) {
+        CommandSourceStack source = context.getSource();
         MinecraftServer server = source.getServer();
-        GameRules rules = server.getGameRules();
-
+        boolean value = BoolArgumentType.getBool(context, "value");
         sendQueryTitle(source);
-
-        for (GameRules.Key<?> key : ModGameRules.REGISTERED) {
-            GameRules.Rule<?> rule = rules.get(key);
-            if (!(rule instanceof GameRules.BooleanRule)) continue;
-
-            GameRuleCommand.executeSet(ctx, key);
-        }
-
+        RULES.forEach((name, rule) -> server.getGameRules().set(rule, value, server));
         return 1;
     }
 
-    private static <T extends GameRules.Rule<T>> void addRuleSubcommand(
-            LiteralArgumentBuilder<ServerCommandSource> root,
-            GameRules.Key<T> key
-    ) {
-        GameRules.Type<T> type = GameRules.getRuleType(key);
-        LiteralArgumentBuilder<ServerCommandSource> literal = literal(key.getName());
-
-        root.then(literal
-                .executes(ctx -> GameRuleCommand.executeQuery(ctx.getSource(), key))
-                .then(type.argument("value")
-                        .executes(ctx -> GameRuleCommand.executeSet(ctx, key))
-                )
-        );
+    private static void addRuleSubcommand(LiteralArgumentBuilder<CommandSourceStack> root, String name, GameRule<Boolean> rule) {
+        root.then(literal(name)
+                .executes(context -> {
+                    executeQuery(context.getSource(), name, rule, context.getSource().getServer().getGameRules());
+                    return 1;
+                })
+                .then(argument("value", BoolArgumentType.bool())
+                        .executes(context -> {
+                            CommandSourceStack source = context.getSource();
+                            source.getServer().getGameRules().set(rule, BoolArgumentType.getBool(context, "value"), source.getServer());
+                            return 1;
+                        })));
     }
 }

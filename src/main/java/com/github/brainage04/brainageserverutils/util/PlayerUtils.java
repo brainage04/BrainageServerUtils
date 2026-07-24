@@ -1,25 +1,22 @@
 package com.github.brainage04.brainageserverutils.util;
 
-import net.minecraft.network.packet.s2c.play.SetPlayerInventoryS2CPacket;
-import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.server.level.ServerPlayer;
 
-public class PlayerUtils {
-    public static void updateHotbar(ServerPlayerEntity player) {
+public final class PlayerUtils {
+    private PlayerUtils() {
+    }
+
+    public static void updateHotbar(ServerPlayer player) {
         for (int i = 0; i < 9; i++) {
             updateHotbarSlot(player, i);
         }
     }
 
-    public static void updateSelectedSlot(ServerPlayerEntity player) {
+    public static void updateSelectedSlot(ServerPlayer player) {
         updateHotbarSlot(player, player.getInventory().getSelectedSlot());
     }
 
-    public static void updateHotbarSlot(ServerPlayerEntity player, int i) {
-        player.networkHandler.sendPacket(
-                new SetPlayerInventoryS2CPacket(
-                        i,
-                        player.getInventory().getStack(i)
-                )
-        );
+    public static void updateHotbarSlot(ServerPlayer player, int slot) {
+        player.connection.send(player.getInventory().createInventoryUpdatePacket(slot));
     }
 }

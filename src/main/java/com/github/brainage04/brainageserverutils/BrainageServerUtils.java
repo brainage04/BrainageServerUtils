@@ -1,10 +1,8 @@
 package com.github.brainage04.brainageserverutils;
 
 import com.github.brainage04.brainageserverutils.command.core.ModCommands;
-import com.github.brainage04.brainageserverutils.event.ModEvents;
 import com.github.brainage04.brainageserverutils.gamerule.ModGameRules;
 import com.github.brainage04.brainageserverutils.listener.ServerTickListener;
-import com.github.brainage04.brainageserverutils.util.PotionSyncTicker;
 import com.github.brainage04.brainageserverutils.util.RunnableScheduler;
 import net.fabricmc.api.ModInitializer;
 import org.slf4j.Logger;
@@ -19,11 +17,9 @@ public class BrainageServerUtils implements ModInitializer {
     public void onInitialize() {
         LOGGER.info("{} initialising...", MOD_NAME);
 
-        ModCommands.initialize();
         ModGameRules.initialize();
-        ModEvents.initialize();
+        ModCommands.initialize();
         ServerTickListener.initialize();
-        PotionSyncTicker.initialize();
         RunnableScheduler.initialize();
 
         LOGGER.info("{} initialised.", MOD_NAME);

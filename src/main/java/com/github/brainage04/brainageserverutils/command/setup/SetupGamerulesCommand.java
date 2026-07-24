@@ -1,40 +1,32 @@
 package com.github.brainage04.brainageserverutils.command.setup;
 
 import com.mojang.brigadier.CommandDispatcher;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.text.Text;
-import net.minecraft.world.GameRules;
+import net.minecraft.world.level.gamerules.GameRules;
 
-import static net.minecraft.server.command.CommandManager.literal;
+import static net.minecraft.commands.Commands.literal;
 
-public class SetupGamerulesCommand {
-    public static int execute(ServerCommandSource source) {
-        source.sendFeedback(() -> Text.literal("Setting up gamerules..."), true);
+public final class SetupGamerulesCommand {
+    private SetupGamerulesCommand() {
+    }
 
-        GameRules rules = source.getWorld().getGameRules();
+    public static int execute(CommandSourceStack source) {
+        source.sendSuccess(() -> Component.literal("Setting up gamerules..."), true);
+        GameRules rules = source.getLevel().getGameRules();
         MinecraftServer server = source.getServer();
-
-        rules.get(GameRules.DO_MOB_GRIEFING).set(false, server);
-        rules.get(GameRules.KEEP_INVENTORY).set(true, server);
-        rules.get(GameRules.MOB_EXPLOSION_DROP_DECAY).set(false, server);
-        rules.get(GameRules.LOCATOR_BAR).set(false, server);
-
-        rules.get(GameRules.SPAWN_RADIUS).set(0, server);
-        rules.get(GameRules.PLAYERS_SLEEPING_PERCENTAGE).set(1, server);
-
-        source.sendFeedback(() -> Text.literal("Gamerules set up."), true);
-
+        rules.set(GameRules.MOB_GRIEFING, false, server);
+        rules.set(GameRules.KEEP_INVENTORY, true, server);
+        rules.set(GameRules.MOB_EXPLOSION_DROP_DECAY, false, server);
+        rules.set(GameRules.LOCATOR_BAR, false, server);
+        rules.set(GameRules.RESPAWN_RADIUS, 0, server);
+        rules.set(GameRules.PLAYERS_SLEEPING_PERCENTAGE, 1, server);
+        source.sendSuccess(() -> Component.literal("Gamerules set up."), true);
         return 1;
     }
 
-    public static void initialize(CommandDispatcher<ServerCommandSource> dispatcher) {
-        dispatcher.register(literal("setupgamerules")
-                .executes(context ->
-                        execute(
-                                context.getSource()
-                        )
-                )
-        );
+    public static void initialize(CommandDispatcher<CommandSourceStack> dispatcher) {
+        dispatcher.register(literal("setupgamerules").executes(context -> execute(context.getSource())));
     }
 }
