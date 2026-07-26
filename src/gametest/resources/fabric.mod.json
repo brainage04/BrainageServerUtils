@@ -7,6 +7,9 @@
   "entrypoints": {
     "fabric-gametest": [
       "com.github.brainage04.brainageserverutils.BrainageServerUtilsGameTest"
+    ],
+    "fabric-client-gametest": [
+      "com.github.brainage04.brainageserverutils.BrainageServerUtilsClientGameTest"
     ]
   }
 }
