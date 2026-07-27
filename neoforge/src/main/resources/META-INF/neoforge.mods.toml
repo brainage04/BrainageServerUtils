@@ -1,0 +1,28 @@
+modLoader="javafml"
+loaderVersion="[11,)"
+license="MIT"
+
+[[mods]]
+modId="brainageserverutils"
+version="${version}"
+displayName="Brainage Server Utils"
+description="Server-side gameplay utilities and configurable interactions."
+authors="brainage04"
+displayURL="https://github.com/brainage04/BrainageServerUtils"
+
+[[mixins]]
+config="brainageserverutils.mixins.json"
+
+[[dependencies.brainageserverutils]]
+modId="neoforge"
+type="required"
+versionRange="[26.2.0.23-beta,)"
+ordering="NONE"
+side="BOTH"
+
+[[dependencies.brainageserverutils]]
+modId="minecraft"
+type="required"
+versionRange="[26.2,26.3)"
+ordering="NONE"
+side="BOTH"

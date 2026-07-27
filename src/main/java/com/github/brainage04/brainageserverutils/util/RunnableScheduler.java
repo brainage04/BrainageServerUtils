@@ -1,7 +1,7 @@
 package com.github.brainage04.brainageserverutils.util;
 
 import com.github.brainage04.brainageserverutils.BrainageServerUtils;
-import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
+import net.minecraft.server.MinecraftServer;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -23,21 +23,19 @@ public class RunnableScheduler {
 
     private static final List<ScheduledTask> scheduledTasks = new ArrayList<>();
 
-    public static void initialize() {
-        ServerTickEvents.START_SERVER_TICK.register(server -> {
-            if (scheduledTasks.isEmpty()) return;
+    public static void tick(MinecraftServer server) {
+        if (scheduledTasks.isEmpty()) return;
 
-            Iterator<ScheduledTask> iterator = scheduledTasks.iterator();
-            while (iterator.hasNext()) {
-                ScheduledTask task = iterator.next();
-                task.ticksPassed++;
+        Iterator<ScheduledTask> iterator = scheduledTasks.iterator();
+        while (iterator.hasNext()) {
+            ScheduledTask task = iterator.next();
+            task.ticksPassed++;
 
-                if (task.ticksPassed >= task.delay) {
-                    server.execute(task.runnable);
-                    iterator.remove();
-                }
+            if (task.ticksPassed >= task.delay) {
+                server.execute(task.runnable);
+                iterator.remove();
             }
-        });
+        }
     }
 
     public static void scheduleTask(Runnable runnable, int extraTickDelay) {
