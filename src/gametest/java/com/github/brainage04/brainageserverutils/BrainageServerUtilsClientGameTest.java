@@ -5,7 +5,7 @@ import io.github.brainage04.fabricmoddingconventions.ClientGameTestRecorder;
 import io.github.brainage04.fabricmoddingconventions.ClientGameTestServers;
 import net.fabricmc.fabric.api.client.gametest.v1.FabricClientGameTest;
 import net.fabricmc.fabric.api.client.gametest.v1.context.ClientGameTestContext;
-import net.fabricmc.fabric.api.client.gametest.v1.context.TestDedicatedServerContext;
+
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
@@ -28,57 +28,54 @@ public final class BrainageServerUtilsClientGameTest implements FabricClientGame
     public void runTest(ClientGameTestContext context) {
         Properties serverProperties = ClientGameTestServers.flatServerProperties();
 
-        try (TestDedicatedServerContext server = context.worldBuilder().createServer(serverProperties)) {
-            ClientGameTestServers.connectToDedicatedServer(context, server, "Brainage Server Utils inventory recording GameTest");
+        ClientGameTestServers.withDedicatedServer(context, serverProperties, "Brainage Server Utils inventory recording GameTest", server -> { try {
+            RuleSnapshot rules = server.computeOnServer(BrainageServerUtilsClientGameTest::prepareDurabilityStage);
             try {
-                RuleSnapshot rules = server.computeOnServer(BrainageServerUtilsClientGameTest::prepareDurabilityStage);
-                try {
-                    ClientGameTestServers.assertClientWorldAndPlayerAvailable(context);
-                    context.waitTicks(20);
-                    assertSelectedClientItem(context, Items.DIAMOND_PICKAXE, DURABILITY_SLOT, 1);
-
-                    ClientGameTestRecorder.startRecording(context);
-                    ClientGameTestRecorder.showStep(
-                            context,
-                            "serverutils.durability",
-                            "Durability preservation",
-                            "The held diamond pickaxe remains undamaged while disable_durability is enabled"
-                    );
-                    context.waitTicks(35);
-
-                    server.runOnServer(BrainageServerUtilsClientGameTest::prepareItemPreservationStage);
-                    selectClientSlot(context, ITEM_PRESERVATION_SLOT);
-                    context.waitTicks(10);
-                    assertSelectedClientItem(context, Items.APPLE, ITEM_PRESERVATION_SLOT, 3);
-                    ClientGameTestRecorder.showStep(
-                            context,
-                            "serverutils.item-preservation",
-                            "Item preservation",
-                            "Consuming an apple leaves all three apples in the selected hotbar stack"
-                    );
-                    context.waitTicks(35);
-
-                    server.runOnServer(BrainageServerUtilsClientGameTest::prepareInstantConsumptionStage);
-                    selectClientSlot(context, INSTANT_CONSUMPTION_SLOT);
-                    context.waitTicks(10);
-                    assertSelectedClientItem(context, Items.GOLDEN_APPLE, INSTANT_CONSUMPTION_SLOT, 1);
-                    ClientGameTestRecorder.showStep(
-                            context,
-                            "serverutils.instant-consumption",
-                            "Instant consumption",
-                            "The selected golden apple uses the one-tick instant_consume behavior"
-                    );
-                    context.waitTicks(35);
-                } finally {
-                    server.runOnServer(minecraftServer -> {
-                        rules.restore(minecraftServer);
-                        player(minecraftServer).getInventory().clearContent();
-                    });
-                }
+                ClientGameTestServers.assertClientWorldAndPlayerAvailable(context);
+                context.waitTicks(20);
+                assertSelectedClientItem(context, Items.DIAMOND_PICKAXE, DURABILITY_SLOT, 1);
+        
+                ClientGameTestRecorder.startRecording(context);
+                ClientGameTestRecorder.showStep(
+                        context,
+                        "serverutils.durability",
+                        "Durability preservation",
+                        "The held diamond pickaxe remains undamaged while disable_durability is enabled"
+                );
+                context.waitTicks(35);
+        
+                server.runOnServer(BrainageServerUtilsClientGameTest::prepareItemPreservationStage);
+                selectClientSlot(context, ITEM_PRESERVATION_SLOT);
+                context.waitTicks(10);
+                assertSelectedClientItem(context, Items.APPLE, ITEM_PRESERVATION_SLOT, 3);
+                ClientGameTestRecorder.showStep(
+                        context,
+                        "serverutils.item-preservation",
+                        "Item preservation",
+                        "Consuming an apple leaves all three apples in the selected hotbar stack"
+                );
+                context.waitTicks(35);
+        
+                server.runOnServer(BrainageServerUtilsClientGameTest::prepareInstantConsumptionStage);
+                selectClientSlot(context, INSTANT_CONSUMPTION_SLOT);
+                context.waitTicks(10);
+                assertSelectedClientItem(context, Items.GOLDEN_APPLE, INSTANT_CONSUMPTION_SLOT, 1);
+                ClientGameTestRecorder.showStep(
+                        context,
+                        "serverutils.instant-consumption",
+                        "Instant consumption",
+                        "The selected golden apple uses the one-tick instant_consume behavior"
+                );
+                context.waitTicks(35);
             } finally {
-                ClientGameTestServers.disconnectFromDedicatedServer(context);
+                server.runOnServer(minecraftServer -> {
+                    rules.restore(minecraftServer);
+                    player(minecraftServer).getInventory().clearContent();
+                });
             }
-        }
+        } finally {
+            ;
+        } });
     }
 
     private static RuleSnapshot prepareDurabilityStage(MinecraftServer server) {
