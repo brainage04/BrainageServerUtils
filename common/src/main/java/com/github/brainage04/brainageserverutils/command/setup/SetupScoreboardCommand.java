@@ -2,6 +2,7 @@ package com.github.brainage04.brainageserverutils.command.setup;
 
 import com.mojang.brigadier.CommandDispatcher;
 import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.Commands;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.ServerScoreboard;
 import net.minecraft.world.scores.DisplaySlot;
@@ -40,6 +41,8 @@ public final class SetupScoreboardCommand {
     }
 
     public static void initialize(CommandDispatcher<CommandSourceStack> dispatcher) {
-        dispatcher.register(literal("setupscoreboard").executes(context -> execute(context.getSource())));
+        dispatcher.register(literal("setupscoreboard")
+                .requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS))
+                .executes(context -> execute(context.getSource())));
     }
 }

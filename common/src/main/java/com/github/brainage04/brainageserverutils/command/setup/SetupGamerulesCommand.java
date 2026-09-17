@@ -2,6 +2,7 @@ package com.github.brainage04.brainageserverutils.command.setup;
 
 import com.mojang.brigadier.CommandDispatcher;
 import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.Commands;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.level.gamerules.GameRules;
@@ -27,6 +28,8 @@ public final class SetupGamerulesCommand {
     }
 
     public static void initialize(CommandDispatcher<CommandSourceStack> dispatcher) {
-        dispatcher.register(literal("setupgamerules").executes(context -> execute(context.getSource())));
+        dispatcher.register(literal("setupgamerules")
+                .requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS))
+                .executes(context -> execute(context.getSource())));
     }
 }

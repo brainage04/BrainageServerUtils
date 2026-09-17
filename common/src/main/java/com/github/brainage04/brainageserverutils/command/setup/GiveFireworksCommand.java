@@ -2,6 +2,7 @@ package com.github.brainage04.brainageserverutils.command.setup;
 
 import com.mojang.brigadier.CommandDispatcher;
 import it.unimi.dsi.fastutil.ints.IntList;
+import net.minecraft.commands.Commands;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.core.component.DataComponentMap;
@@ -40,7 +41,12 @@ public final class GiveFireworksCommand {
     }
 
     public static void initialize(CommandDispatcher<CommandSourceStack> dispatcher) {
-        dispatcher.register(literal("givefireworks").then(argument("targets", EntityArgument.players())
-                .executes(context -> execute(context.getSource(), EntityArgument.getPlayers(context, "targets")))));
+        dispatcher.register(literal("givefireworks")
+                .requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS))
+                .then(argument("targets", EntityArgument.players())
+                        .executes(context -> execute(
+                                context.getSource(),
+                                EntityArgument.getPlayers(context, "targets")
+                        ))));
     }
 }
