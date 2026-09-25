@@ -2,5 +2,9 @@
   "gamerule.brainageserverutils.disable_durability": "Disable Durability",
   "gamerule.brainageserverutils.disable_item_decrement": "Disable Item Decrement",
   "gamerule.brainageserverutils.disable_bucket_decrement": "Disable Bucket Decrement",
-  "gamerule.brainageserverutils.instant_consume": "Instant Consumption"
+  "gamerule.brainageserverutils.instant_consume": "Instant Consumption",
+  "gamerule.brainageserverutils.disable_hunger": "Disable Hunger",
+  "gamerule.brainageserverutils.free_enchanting": "Free Enchanting",
+  "gamerule.brainageserverutils.disable_too_expensive": "Disable Too Expensive",
+  "gamerule.brainageserverutils.disable_item_cooldowns": "Disable Item Cooldowns"
 }

@@ -1,0 +1,4 @@
+// GameTest bodies shared by both loaders; each loader only registers them.
+sourceSets.matching { it.name == 'gametest' }.configureEach {
+	java.srcDir(rootProject.file('common/src/gametest/java'))
+}

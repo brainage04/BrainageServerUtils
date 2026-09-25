@@ -18,13 +18,13 @@ config="brainageserverutils.mixins.json"
 [[dependencies.brainageserverutils]]
 modId="neoforge"
 type="required"
-versionRange="[26.2.0.23-beta,)"
+versionRange="[${neoforge_version},)"
 ordering="NONE"
 side="BOTH"
 
 [[dependencies.brainageserverutils]]
 modId="minecraft"
 type="required"
-versionRange="[26.2,26.3)"
+versionRange="[${minecraft_version},26.3)"
 ordering="NONE"
 side="BOTH"

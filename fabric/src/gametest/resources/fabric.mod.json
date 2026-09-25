@@ -6,10 +6,10 @@
   "environment": "*",
   "entrypoints": {
     "fabric-gametest": [
-      "com.github.brainage04.brainageserverutils.BrainageServerUtilsGameTest"
+      "io.github.brainage04.brainageserverutils.BrainageServerUtilsGameTest"
     ],
     "fabric-client-gametest": [
-      "com.github.brainage04.brainageserverutils.BrainageServerUtilsClientGameTest"
+      "io.github.brainage04.brainageserverutils.BrainageServerUtilsClientGameTest"
     ]
   }
 }

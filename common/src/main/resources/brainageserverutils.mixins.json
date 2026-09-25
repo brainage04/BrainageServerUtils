@@ -1,13 +1,22 @@
 {
   "required": true,
-  "package": "com.github.brainage04.brainageserverutils.mixin",
+  "package": "io.github.brainage04.brainageserverutils.mixin",
   "compatibilityLevel": "JAVA_21",
   "mixins": [
-    "entity.MixinPersistentProjectileEntity",
-    "item.MixinConsumableComponent",
+    "entity.MixinAbstractArrow",
+    "entity.MixinFoodData",
+    "entity.MixinPlayer",
+    "entity.MixinServerPlayer",
+    "inventory.MixinAnvilMenu",
+    "inventory.MixinEnchantmentMenu",
+    "item.MixinBlocksAttacks",
+    "item.MixinConsumable",
     "item.MixinEnchantmentHelper",
+    "item.MixinItemCooldowns",
     "item.MixinItemStack",
-    "item.MixinItemUsage"
+    "item.MixinItemUtils",
+    "item.ServerItemCooldownsAccessor",
+    "network.MixinServerCommonPacketListenerImpl"
   ],
   "injectors": {
     "defaultRequire": 1
