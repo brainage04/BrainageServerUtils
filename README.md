@@ -5,7 +5,7 @@ A server-side utility mod for Fabric and NeoForge on Minecraft 26.2. Clients do 
 ## Requirements
 
 - Minecraft 26.2
-- Fabric Loader 0.19.3 or newer with Fabric API, or NeoForge 26.2.0.41-beta or newer
+- Fabric Loader 0.19.3 or newer with Fabric API, or NeoForge 26.2.0.88 or newer
 - Java 25 or newer
 
 ## Gamerules
