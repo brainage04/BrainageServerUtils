@@ -16,6 +16,11 @@ public final class BrainageServerUtilsGameTest {
     }
 
     @GameTest
+    public void durabilityRulePreventsItemDamage(GameTestHelper helper) {
+        ServerUtilsGameTests.durabilityRulePreventsItemDamage(helper);
+    }
+
+    @GameTest
     public void maxEnchantResolvesConflictsByPreference(GameTestHelper helper) {
         ServerUtilsGameTests.maxEnchantResolvesConflictsByPreference(helper);
     }

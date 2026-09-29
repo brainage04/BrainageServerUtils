@@ -16,6 +16,7 @@ public final class BrainageServerUtilsGameTest {
     private static final Map<String, Consumer<GameTestHelper>> TESTS = Map.of(
             "custom_rules_and_commands_are_registered", ServerUtilsGameTests::customRulesAndCommandsAreRegistered,
             "item_and_consumption_rules_change_runtime_behavior", ServerUtilsGameTests::itemAndConsumptionRulesChangeRuntimeBehavior,
+            "durability_rule_prevents_item_damage", ServerUtilsGameTests::durabilityRulePreventsItemDamage,
             "max_enchant_resolves_conflicts_by_preference", ServerUtilsGameTests::maxEnchantResolvesConflictsByPreference,
             "hunger_and_cooldown_rules_affect_players", ServerUtilsGameTests::hungerAndCooldownRulesAffectPlayers,
             "enchanting_rules_waive_level_costs_and_cap", ServerUtilsGameTests::enchantingRulesWaiveLevelCostsAndCap,

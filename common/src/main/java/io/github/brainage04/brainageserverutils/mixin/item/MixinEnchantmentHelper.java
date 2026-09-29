@@ -27,4 +27,23 @@ public abstract class MixinEnchantmentHelper {
             cir.setReturnValue(0);
         }
     }
+
+    /// Every durability loss (`ItemStack.hurtAndBreak` and `hurtWithoutBreaking`) funnels through this helper on
+    /// both loaders. `ItemStack.processDurabilityChange` itself cannot be targeted: NeoForge re-routes it through a
+    /// `LivingEntity` overload that vanilla does not have.
+    @Inject(
+            method = "processDurabilityChange(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/item/ItemStack;I)I",
+            at = @At("HEAD"),
+            cancellable = true
+    )
+    private static void processDurabilityChange(
+            ServerLevel level,
+            ItemStack stack,
+            int baseDamage,
+            CallbackInfoReturnable<Integer> cir
+    ) {
+        if (level.getGameRules().get(ModGameRules.DISABLE_DURABILITY)) {
+            cir.setReturnValue(0);
+        }
+    }
 }

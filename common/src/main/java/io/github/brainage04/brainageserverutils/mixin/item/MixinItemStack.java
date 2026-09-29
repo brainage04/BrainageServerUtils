@@ -13,28 +13,11 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(ItemStack.class)
 public abstract class MixinItemStack {
     @Shadow
     public abstract Item getItem();
-
-    @Inject(
-            method = "processDurabilityChange(ILnet/minecraft/server/level/ServerLevel;Lnet/minecraft/server/level/ServerPlayer;)I",
-            at = @At("HEAD"),
-            cancellable = true
-    )
-    private void processDurabilityChange$injected(
-            int baseDamage,
-            ServerLevel level,
-            ServerPlayer player,
-            CallbackInfoReturnable<Integer> cir
-    ) {
-        if (level.getGameRules().get(ModGameRules.DISABLE_DURABILITY)) {
-            cir.setReturnValue(0);
-        }
-    }
 
     @Inject(
             method = "consume(ILnet/minecraft/world/entity/LivingEntity;)V",

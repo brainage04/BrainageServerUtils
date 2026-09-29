@@ -18,6 +18,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.EntitySpawnReason;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.monster.zombie.Zombie;
 import net.minecraft.world.inventory.AnvilMenu;
@@ -73,6 +74,33 @@ public final class ServerUtilsGameTests {
             assertTrue(consumable.consumeTicks() > 1, "Expected vanilla consumption duration");
             setRule(helper, ModGameRules.INSTANT_CONSUME, true);
             assertEquals(1, consumable.consumeTicks(), "Expected one-tick consumption");
+        } finally {
+            resetRules(helper);
+        }
+        helper.succeed();
+    }
+
+    /// Uses a zombie rather than a mock player: mock players report creative mode, which skips durability loss anyway.
+    public static void durabilityRulePreventsItemDamage(GameTestHelper helper) {
+        ServerLevel level = helper.getLevel();
+        Zombie user = EntityTypes.ZOMBIE.create(level, EntitySpawnReason.COMMAND);
+        assertTrue(user != null, "Expected to create a zombie");
+        ItemStack pickaxe = new ItemStack(Items.DIAMOND_PICKAXE);
+        ItemStack chestplate = new ItemStack(Items.IRON_CHESTPLATE);
+        user.setItemSlot(EquipmentSlot.MAINHAND, pickaxe);
+        user.setItemSlot(EquipmentSlot.CHEST, chestplate);
+        try {
+            setRule(helper, ModGameRules.DISABLE_DURABILITY, true);
+            pickaxe.hurtAndBreak(5, user, EquipmentSlot.MAINHAND);
+            chestplate.hurtAndBreak(5, user, EquipmentSlot.CHEST);
+            assertEquals(0, pickaxe.getDamageValue(), "Expected disable_durability to preserve the held tool");
+            assertEquals(0, chestplate.getDamageValue(), "Expected disable_durability to preserve the worn armour");
+
+            setRule(helper, ModGameRules.DISABLE_DURABILITY, false);
+            pickaxe.hurtAndBreak(5, user, EquipmentSlot.MAINHAND);
+            chestplate.hurtAndBreak(5, user, EquipmentSlot.CHEST);
+            assertEquals(5, pickaxe.getDamageValue(), "Expected vanilla durability loss on the held tool");
+            assertEquals(5, chestplate.getDamageValue(), "Expected vanilla durability loss on the worn armour");
         } finally {
             resetRules(helper);
         }
