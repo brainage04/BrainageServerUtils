@@ -71,6 +71,10 @@ Conflicts are resolved in this order: preferred enchantments passed to the comma
 
 The build produces separate Fabric and NeoForge JARs in `build/libs`; production GameTests validate entrypoint initialization, gameplay mixins, and commands on each loader. The shared GameTest bodies live in `common/src/gametest` and are compiled into each loader's GameTest source set.
 
+## Publishing
+
+Release automation is documented in [docs/RELEASE.md](docs/RELEASE.md). Optional Modrinth publishing is documented in [docs/MODRINTH.md](docs/MODRINTH.md).
+
 ## License
 
 BrainageServerUtils is available under the MIT License.
