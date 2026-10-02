@@ -2,8 +2,12 @@
 
 ## What this is
 
-The mod's icon: `icon.png` — 32x32 RGBA PNG, 597 bytes,
-sha256 `31ebdfd8574226763e3880a72f9e38f9bccf8c1ead71480ccd74a0011d7b5680`.
+The mod's icon: `icon.png` — 512x512 RGBA PNG, 2 874 bytes,
+sha256 `1b3c0cb45d934645b3c2c8950068043788070763eb995c94f0379bc03f8ba382`. It is the native
+32x32 composition described below enlarged **16x with NEAREST** (the icon rule of 2026-10-02:
+square, a power of two, 512 or 1024 px). The mod ships byte-identical copies at
+`common/src/main/resources/assets/brainageserverutils/icon.png` and
+`fabric/src/gametest/resources/assets/brainageserverutils/icon.png`.
 
 Two layers: behind, a 16x16 historical **vanilla procedural gear frame** enlarged 2x; in
 front, the author's own **player head face** enlarged 2x and centred.
@@ -25,10 +29,13 @@ script) a 90° transpose.
 | Face source | the author's **own supplied skin**, `sources/supplied-skin.png` (sha256 `e9ebbeec…`), provided locally by the author; it is never fetched by username or UUID |
 | Face geometry | flat face UV `(8,8)-(16,16)` composited with the hat layer's front UV `(40,8)-(48,16)` (both flat layers, as `derivations.json` records), then doubled from 8x8 to 16x16 |
 | Composition | 32x32 canvas; gear frame doubled to 32x32 at `(0,0)`; face doubled and centred at `(8,8)` on top |
+| Final size | the 32x32 composition enlarged 16x with NEAREST to 512x512 (`brainage-server-utils-512.png`) |
 
 Everything is integer, deterministic and replayable: running the script again produces the
 same bytes. Verified while creating this provenance: `python3 render.py` in a clean directory
-holding the 17 shipped source textures reproduces `icon.png` byte for byte.
+holding the 17 shipped source textures reproduces the native 32x32 composition byte for byte;
+since 2026-10-02 the same run also writes the shipped 512x512 `icon.png` as
+`brainage-server-utils-512.png`.
 
 ## Provenance files
 
@@ -54,7 +61,8 @@ PYTHONPATH=/nix/store/4v9j9wbzyhrlx9980ygbr812313mazy0-python3.13-pillow-12.3.0/
   python3 render.py
 ```
 
-This rewrites `brainage-server-utils.png` (and the other pixel icons the script contains) and
+This rewrites `brainage-server-utils.png` (native 32x32), `brainage-server-utils-512.png` (the
+shipped `icon.png`), the other pixel icons the script contains, and
 `manifest.json`. It needs no network: every texture `render.py` reads is in `sources/`, and each
 one was verified against its pinned sha256 when this provenance was assembled.
 
@@ -78,7 +86,7 @@ python3 acquire_sources.py     # see the Note about the duplicate potion.png ent
   the two source textures are the original Mojang files and the sampling rule is the historical
   one, so the result is the same image the old client generated.
 * All colours and pixels come from those sources; nothing here is upscaled with interpolation,
-  so the icon is crisp at 32x32 and at integer multiples of it.
+  so the icon is crisp at 32x32 and at integer multiples of it such as the shipped 512x512.
 
 ## Working-tree note
 
