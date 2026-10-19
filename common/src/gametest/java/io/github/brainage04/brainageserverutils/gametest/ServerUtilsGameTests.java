@@ -203,6 +203,7 @@ public final class ServerUtilsGameTests {
         ServerPlayer killer = survivalPlayer(helper);
         ServerPlayer victim = survivalPlayer(helper);
         try {
+            setRule(helper, GameRules.PVP, true);
             run(server, server.createCommandSourceStack().withSuppressedOutput(), "setupscoreboard");
             Objective health = scoreboard.getObjective("Health");
             Objective deaths = scoreboard.getObjective("Deaths");
@@ -323,7 +324,9 @@ public final class ServerUtilsGameTests {
     public static void enchantingRulesWaiveLevelCostsAndCap(GameTestHelper helper) {
         ServerPlayer player = survivalPlayer(helper);
         try {
-            EnchantmentMenu table = new EnchantmentMenu(0, player.getInventory());
+            EnchantmentMenu table = new EnchantmentMenu(0, player.getInventory(),
+                    net.minecraft.world.inventory.ContainerLevelAccess.create(helper.getLevel(),
+                            helper.absolutePos(new net.minecraft.core.BlockPos(1, 1, 1))));
             table.getSlot(0).set(new ItemStack(Items.DIAMOND_SWORD));
             table.getSlot(1).set(new ItemStack(Items.LAPIS_LAZULI, 3));
             table.costs[0] = 30;
@@ -544,6 +547,7 @@ public final class ServerUtilsGameTests {
         Connection connection = new Connection(PacketFlow.SERVERBOUND);
         new EmbeddedChannel(connection);
         level.getServer().getPlayerList().placeNewPlayer(connection, player, cookie);
+        player.connection.handleAcceptPlayerLoad(new net.minecraft.network.protocol.game.ServerboundPlayerLoadedPacket());
         player.setGameMode(GameType.SURVIVAL);
         var position = helper.absolutePos(new net.minecraft.core.BlockPos(1, 2, 1));
         player.snapTo(position.getX() + 0.5, position.getY(), position.getZ() + 0.5);
