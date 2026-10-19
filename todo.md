@@ -9,3 +9,4 @@ From running the release NeoForge jar on a real NeoForge 26.2.0.41-beta server a
 ## Fleet review (2026-10-19)
 
 - [x] Added shared Fabric and NeoForge regression tests for bucket preservation, fired ammunition consumption and pickup, and Health/Deaths/Kills scoreboard updates.
+- [x] Updated FabricModdingConventions to 2.4.26 to match the workspace template (conformance P2).
