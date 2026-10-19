@@ -27,3 +27,18 @@ There are no standalone unit tests or NeoForge client GameTests. The shared serv
 - Fabric `BrainageServerUtilsClientGameTest.runTest`: keep. Inventory synchronization, the free-enchanting client ability override, `/fly` during that override, anvil cost changes and menu-close restoration cannot be established by server-only tests.
 
 No tests were classified as redundant. Only the registration test was flagged for deletion.
+
+## Coverage gaps and additions
+
+Before this wave, bucket results, arrow pickup and scoreboard updates had no behavioral test. Step 1 adds those on both loaders.
+
+Step 5 extends the shared suite:
+
+- Real survival/adventure/creative `ServerPlayer` fixtures replace GameTest's always-creative mock subclass. Embedded channels provide only the transport; all player and command behavior is production code. Fixture removal closes the channel.
+- `flightAndEnchantingAbilitiesFollowMenuAndGameMode`: keep. Covers toggle/set flight, flight revocation, adventure/creative behavior, game-mode reset, permission denial, free-enchanting ability changes and menu closure on both loaders.
+- `rankingsReloadAndRejectInvalidConfiguration`: keep. Covers live file edits through `/maxenchant`, unknown registry IDs, malformed JSON, schema/type/duplicate rejection and default-file recreation. Restores the original file in a finally block.
+- Existing command coverage now checks ranged and elytra kits, rocket components, healing air/saturation/freezing while preserving beneficial effects, all four environmental damage rules and the six common preset settings.
+- Existing hunger coverage now applies exhaustion and checks saturation preservation. Enchanting checks lapis consumption.
+- Every shared body snapshots and restores all gamerules at its loader boundary, including the vanilla rules changed by presets.
+
+Remaining manual coverage: the NeoForge unmodified-client GUI has no client GameTest, although the shared abilities and menu tests execute its server hooks. Pixel appearance and translated vanilla tooltip layout remain visual checks; this mod has no custom renderer, background worker or shutdown-owned resource. Fabric's client test covers actual packet delivery and menu transitions. Full inventories, every possible third-party enchantment conflict, per-language command prose and disconnect/rejoin while an enchanting menu is open are not exhaustive automated scenarios.

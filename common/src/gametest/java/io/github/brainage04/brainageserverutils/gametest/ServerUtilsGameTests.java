@@ -1,21 +1,36 @@
 package io.github.brainage04.brainageserverutils.gametest;
 
+import com.mojang.authlib.GameProfile;
+import io.netty.channel.embedded.EmbeddedChannel;
 import io.github.brainage04.brainageserverutils.config.EnchantmentRankings;
 import io.github.brainage04.brainageserverutils.enchantment.MaxEnchantment;
 import io.github.brainage04.brainageserverutils.gamerule.ModGameRules;
+import io.github.brainage04.brainageserverutils.util.ShownAbilities;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.List;
+import java.util.UUID;
+import java.util.function.Consumer;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.gametest.framework.GameTestHelper;
+import net.minecraft.network.Connection;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.protocol.PacketFlow;
+import net.minecraft.network.protocol.game.ClientboundPlayerAbilitiesPacket;
 import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.ServerScoreboard;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.network.CommonListenerCookie;
+import net.minecraft.server.permissions.PermissionSet;
+import net.minecraft.world.SimpleMenuProvider;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.EntitySpawnReason;
@@ -43,6 +58,16 @@ import net.minecraft.world.scores.criteria.ObjectiveCriteria;
 /// GameTest bodies shared by the Fabric and NeoForge GameTest registrations.
 public final class ServerUtilsGameTests {
     private ServerUtilsGameTests() {
+    }
+
+    public static void runIsolated(GameTestHelper helper, Consumer<GameTestHelper> test) {
+        MinecraftServer server = helper.getLevel().getServer();
+        GameRules original = server.getGameRules().copy(helper.getLevel().enabledFeatures());
+        try {
+            test.accept(helper);
+        } finally {
+            server.getGameRules().setAll(original, server);
+        }
     }
 
     public static void itemAndConsumptionRulesChangeRuntimeBehavior(GameTestHelper helper) {
@@ -122,7 +147,7 @@ public final class ServerUtilsGameTests {
             }
         } finally {
             resetRules(helper);
-            helper.getLevel().getServer().getPlayerList().remove(player);
+            removePlayer(player);
         }
         helper.succeed();
     }
@@ -153,7 +178,7 @@ public final class ServerUtilsGameTests {
             helper.getLevel().getEntitiesOfClass(Arrow.class, player.getBoundingBox().inflate(4),
                     arrow -> arrow.getOwner() == player).forEach(Arrow::discard);
             resetRules(helper);
-            helper.getLevel().getServer().getPlayerList().remove(player);
+            removePlayer(player);
         }
         helper.succeed();
     }
@@ -212,8 +237,8 @@ public final class ServerUtilsGameTests {
             scoreboard.setDisplayObjective(DisplaySlot.BELOW_NAME, belowName);
             scoreboard.setDisplayObjective(DisplaySlot.LIST, list);
             scoreboard.setDisplayObjective(DisplaySlot.SIDEBAR, sidebar);
-            server.getPlayerList().remove(killer);
-            server.getPlayerList().remove(victim);
+            removePlayer(killer);
+            removePlayer(victim);
         }
         helper.succeed();
     }
@@ -266,8 +291,11 @@ public final class ServerUtilsGameTests {
             player.getFoodData().tick(player);
             assertEquals(3, player.getFoodData().getFoodLevel(), "Expected hunger to stay low without the rule");
             setRule(helper, ModGameRules.DISABLE_HUNGER, true);
+            player.getFoodData().setSaturation(5.0F);
+            player.getFoodData().addExhaustion(10.0F);
             player.getFoodData().tick(player);
             assertEquals(20, player.getFoodData().getFoodLevel(), "Expected disable_hunger to refill hunger");
+            assertTrue(player.getFoodData().getSaturationLevel() == 5.0F, "Expected hunger disabling to preserve saturation");
 
             ItemStack pearl = new ItemStack(Items.ENDER_PEARL);
             setRule(helper, ModGameRules.DISABLE_ITEM_COOLDOWNS, true);
@@ -287,7 +315,7 @@ public final class ServerUtilsGameTests {
             assertTrue(player.getCooldowns().isOnCooldown(shield), "Expected vanilla shield disabling without the rule");
         } finally {
             resetRules(helper);
-            helper.getLevel().getServer().getPlayerList().remove(player);
+            removePlayer(player);
         }
         helper.succeed();
     }
@@ -303,6 +331,7 @@ public final class ServerUtilsGameTests {
             assertTrue(!table.clickMenuButton(player, 0), "Expected the level requirement without free_enchanting");
             setRule(helper, ModGameRules.FREE_ENCHANTING, true);
             assertTrue(table.clickMenuButton(player, 0), "Expected free_enchanting to waive the level requirement");
+            assertEquals(2, table.getSlot(1).getItem().getCount(), "Expected free enchanting to consume lapis");
 
             player.setExperienceLevels(10);
             player.onEnchantmentPerformed(ItemStack.EMPTY, 3);
@@ -333,7 +362,7 @@ public final class ServerUtilsGameTests {
             assertEquals(45, player.experienceLevel, "Expected free_enchanting to keep levels at the anvil");
         } finally {
             resetRules(helper);
-            helper.getLevel().getServer().getPlayerList().remove(player);
+            removePlayer(player);
         }
         helper.succeed();
     }
@@ -348,6 +377,16 @@ public final class ServerUtilsGameTests {
             ItemStack sword = findItem(player, Items.NETHERITE_SWORD);
             assertEquals(5, level(helper, Enchantments.SHARPNESS, sword), "Expected the kit sword to have Sharpness V");
             assertTrue(sword.has(DataComponents.UNBREAKABLE), "Expected kit gear to be unbreakable");
+            player.getInventory().clearContent();
+            run(server, source, "kit ranged");
+            assertTrue(findItem(player, Items.BOW).has(DataComponents.UNBREAKABLE), "Expected an unbreakable ranged weapon");
+            assertEquals(64, findItem(player, Items.ARROW).getCount(), "Expected a full stack of arrows");
+            player.getInventory().clearContent();
+            run(server, source, "kit elytra");
+            assertTrue(findItem(player, Items.ELYTRA).has(DataComponents.UNBREAKABLE), "Expected unbreakable elytra");
+            var fireworks = findItem(player, Items.FIREWORK_ROCKET).get(DataComponents.FIREWORKS);
+            assertTrue(fireworks != null && fireworks.flightDuration() == 3 && fireworks.explosions().isEmpty(),
+                    "Expected flight-duration-3 rockets without explosions");
 
             player.getInventory().clearContent();
             player.getInventory().setSelectedSlot(0);
@@ -363,32 +402,157 @@ public final class ServerUtilsGameTests {
             player.setRemainingFireTicks(100);
             player.addEffect(new MobEffectInstance(MobEffects.POISON, 200));
             player.getFoodData().setFoodLevel(1);
+            player.getFoodData().setSaturation(0.0F);
+            player.setAirSupply(1);
+            player.setTicksFrozen(100);
+            player.addEffect(new MobEffectInstance(MobEffects.SPEED, 200));
             run(server, source, "heal");
             assertTrue(player.getHealth() == player.getMaxHealth(), "Expected /heal to restore health");
             assertTrue(!player.hasEffect(MobEffects.POISON) && !player.isOnFire(), "Expected /heal to clear poison and fire");
             assertEquals(20, player.getFoodData().getFoodLevel(), "Expected /heal to restore hunger");
+            assertTrue(player.getFoodData().getSaturationLevel() == 20.0F && player.getAirSupply() == player.getMaxAirSupply()
+                            && player.getTicksFrozen() == 0 && player.hasEffect(MobEffects.SPEED),
+                    "Expected /heal to restore saturation and air, thaw and preserve beneficial effects");
 
             run(server, source, "setupgamerules sandbox");
             assertTrue(ModGameRules.REGISTERED.stream().allMatch(rule -> server.getGameRules().get(rule)),
                     "Expected the sandbox preset to enable every mod rule");
             assertTrue(!server.getGameRules().get(GameRules.FALL_DAMAGE), "Expected the sandbox preset to disable fall damage");
+            assertTrue(List.of(GameRules.FIRE_DAMAGE, GameRules.DROWNING_DAMAGE, GameRules.FREEZE_DAMAGE).stream()
+                    .noneMatch(rule -> server.getGameRules().get(rule)), "Expected all sandbox environmental damage disabled");
+            assertTrue(!server.getGameRules().get(GameRules.MOB_GRIEFING)
+                            && server.getGameRules().get(GameRules.KEEP_INVENTORY)
+                            && !server.getGameRules().get(GameRules.MOB_EXPLOSION_DROP_DECAY)
+                            && !server.getGameRules().get(GameRules.LOCATOR_BAR)
+                            && server.getGameRules().get(GameRules.RESPAWN_RADIUS) == 0
+                            && server.getGameRules().get(GameRules.PLAYERS_SLEEPING_PERCENTAGE) == 1,
+                    "Expected the common vanilla preset settings");
             run(server, source, "setupgamerules survival");
             assertTrue(ModGameRules.REGISTERED.stream().noneMatch(rule -> server.getGameRules().get(rule)),
                     "Expected the survival preset to disable every mod rule");
             assertTrue(server.getGameRules().get(GameRules.FALL_DAMAGE), "Expected the survival preset to restore fall damage");
+            assertTrue(List.of(GameRules.FIRE_DAMAGE, GameRules.DROWNING_DAMAGE, GameRules.FREEZE_DAMAGE).stream()
+                    .allMatch(rule -> server.getGameRules().get(rule)), "Expected all survival environmental damage restored");
         } finally {
             resetRules(helper);
-            server.getPlayerList().remove(player);
+            removePlayer(player);
         }
         helper.succeed();
     }
 
-    /// Mock players report creative mode regardless; survival abilities are still needed for the level checks.
-    /// `/fly` is covered by the Fabric client GameTest instead, since it skips creative players.
+    public static void flightAndEnchantingAbilitiesFollowMenuAndGameMode(GameTestHelper helper) {
+        MinecraftServer server = helper.getLevel().getServer();
+        ServerPlayer player = survivalPlayer(helper);
+        CommandSourceStack source = server.createCommandSourceStack().withEntity(player).withSuppressedOutput();
+        try {
+            run(server, source, "fly");
+            assertTrue(player.getAbilities().mayfly, "Expected /fly to toggle survival flight on");
+            player.getAbilities().flying = true;
+            setRule(helper, ModGameRules.FREE_ENCHANTING, true);
+            player.openMenu(new SimpleMenuProvider((id, inventory, menuPlayer) -> new EnchantmentMenu(id, inventory),
+                    Component.literal("Free enchanting")));
+            ClientboundPlayerAbilitiesPacket shown = shownAbilities(player);
+            assertTrue(shown.canInstabuild() && shown.canFly() && shown.isFlying() && !player.getAbilities().instabuild,
+                    "Expected the menu override to preserve flight without granting server-side infinite materials");
+            setRule(helper, ModGameRules.FREE_ENCHANTING, false);
+            assertTrue(!shownAbilities(player).canInstabuild(), "Expected disabling the rule to drop the menu override");
+            setRule(helper, ModGameRules.FREE_ENCHANTING, true);
+            player.closeContainer();
+            assertTrue(!shownAbilities(player).canInstabuild(), "Expected closing the menu to restore normal abilities");
+            run(server, source, "fly @s false");
+            assertTrue(!player.getAbilities().mayfly && !player.getAbilities().flying, "Expected flight revocation to stop flight");
+            player.setGameMode(GameType.ADVENTURE);
+            run(server, source, "fly @s true");
+            assertTrue(player.getAbilities().mayfly, "Expected adventure flight");
+            player.setGameMode(GameType.CREATIVE);
+            run(server, source, "fly @s false");
+            assertTrue(player.getAbilities().mayfly && shownAbilities(player).canInstabuild(),
+                    "Expected /fly to leave creative abilities alone");
+            player.setGameMode(GameType.SURVIVAL);
+            assertTrue(!player.getAbilities().mayfly, "Expected a game-mode change to reset flight");
+            var denied = server.getCommands().getDispatcher().parse("more",
+                    source.withPermission(PermissionSet.NO_PERMISSIONS));
+            assertTrue(denied.getReader().canRead() && denied.getContext().getCommand() == null,
+                    "Expected no command available without game-master permission");
+        } finally {
+            resetRules(helper);
+            removePlayer(player);
+        }
+        helper.succeed();
+    }
+
+    private static ClientboundPlayerAbilitiesPacket shownAbilities(ServerPlayer player) {
+        return ((ShownAbilities) player).brainageserverutils$showAbilities(new ClientboundPlayerAbilitiesPacket(player.getAbilities()));
+    }
+
+    public static void rankingsReloadAndRejectInvalidConfiguration(GameTestHelper helper) {
+        Path path = EnchantmentRankings.path();
+        byte[] original = null;
+        try {
+            original = Files.readAllBytes(path);
+            Files.writeString(path, "{\"enchantment_rankings\":[[\"minecraft:smite\",\"minecraft:sharpness\"]]}");
+            assertTrue(EnchantmentRankings.load().getFirst().getFirst().equals(Enchantments.SMITE.identifier()),
+                    "Expected edited rankings to load without restarting");
+            ServerPlayer player = survivalPlayer(helper);
+            try {
+                player.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(Items.DIAMOND_SWORD));
+                run(helper.getLevel().getServer(), helper.getLevel().getServer().createCommandSourceStack()
+                        .withEntity(player).withSuppressedOutput(), "maxenchant");
+                assertEquals(5, level(helper, Enchantments.SMITE, player.getMainHandItem()), "Expected the command to use edited rankings");
+                Files.writeString(path, "{\"enchantment_rankings\":[[\"minecraft:not_an_enchantment\"]]}");
+                player.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(Items.DIAMOND_SWORD));
+                run(helper.getLevel().getServer(), helper.getLevel().getServer().createCommandSourceStack()
+                        .withEntity(player).withSuppressedOutput(), "maxenchant");
+                assertTrue(player.getMainHandItem().getEnchantments().isEmpty(), "Expected unknown IDs not to change the held item");
+            } finally {
+                removePlayer(player);
+            }
+            for (String invalid : List.of("{", "{}", "{\"enchantment_rankings\":[true]}",
+                    "{\"enchantment_rankings\":[[false]]}",
+                    "{\"enchantment_rankings\":[[\"minecraft:smite\"],[\"minecraft:smite\"]]}")) {
+                Files.writeString(path, invalid);
+                boolean rejected = false;
+                try {
+                    EnchantmentRankings.load();
+                } catch (EnchantmentRankings.InvalidConfigException expected) {
+                    rejected = true;
+                }
+                assertTrue(rejected, "Expected invalid rankings to be rejected: " + invalid);
+            }
+            Files.delete(path);
+            assertTrue(EnchantmentRankings.load().equals(EnchantmentRankings.defaults()) && Files.exists(path),
+                    "Expected a missing file to recreate the default rankings");
+        } catch (IOException | EnchantmentRankings.InvalidConfigException exception) {
+            throw new AssertionError("Could not exercise the test server's rankings file", exception);
+        } finally {
+            if (original != null) {
+                try {
+                    Files.write(path, original);
+                } catch (IOException exception) {
+                    throw new AssertionError("Could not restore the test server's rankings file", exception);
+                }
+            }
+        }
+        helper.succeed();
+    }
+
     private static ServerPlayer survivalPlayer(GameTestHelper helper) {
-        ServerPlayer player = helper.makeMockServerPlayerInLevel();
+        ServerLevel level = helper.getLevel();
+        UUID id = UUID.randomUUID();
+        CommonListenerCookie cookie = CommonListenerCookie.createInitial(new GameProfile(id, "bsu-" + id.toString().substring(0, 8)), false);
+        ServerPlayer player = new ServerPlayer(level.getServer(), level, cookie.gameProfile(), cookie.clientInformation());
+        Connection connection = new Connection(PacketFlow.SERVERBOUND);
+        new EmbeddedChannel(connection);
+        level.getServer().getPlayerList().placeNewPlayer(connection, player, cookie);
         player.setGameMode(GameType.SURVIVAL);
+        var position = helper.absolutePos(new net.minecraft.core.BlockPos(1, 2, 1));
+        player.snapTo(position.getX() + 0.5, position.getY(), position.getZ() + 0.5);
         return player;
+    }
+
+    private static void removePlayer(ServerPlayer player) {
+        player.level().getServer().getPlayerList().remove(player);
+        player.connection.disconnect(Component.literal("GameTest finished"));
     }
 
     private static void run(MinecraftServer server, CommandSourceStack source, String command) {
