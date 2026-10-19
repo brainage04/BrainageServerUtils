@@ -75,7 +75,6 @@ No known incompatibilities.
 ## Documentation
 
 - [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md) - building and GameTests.
-- [docs/TEST_REVIEW.md](docs/TEST_REVIEW.md) - test classifications and coverage.
 - [docs/RELEASE.md](docs/RELEASE.md) - release automation.
 - [docs/MODRINTH.md](docs/MODRINTH.md) - optional Modrinth publishing.
 
