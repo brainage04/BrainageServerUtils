@@ -42,3 +42,15 @@ Step 5 extends the shared suite:
 - Every shared body snapshots and restores all gamerules at its loader boundary, including the vanilla rules changed by presets.
 
 Remaining manual coverage: the NeoForge unmodified-client GUI has no client GameTest, although the shared abilities and menu tests execute its server hooks. Pixel appearance and translated vanilla tooltip layout remain visual checks; this mod has no custom renderer, background worker or shutdown-owned resource. Fabric's client test covers actual packet delivery and menu transitions. Full inventories, every possible third-party enchantment conflict, per-language command prose and disconnect/rejoin while an enchanting menu is open are not exhaustive automated scenarios.
+
+## Code review
+
+Reviewed the shared commands, ranking parser/selection, gamerule hooks, packet/ability handling, inventory resynchronization and both loader entrypoints. Lifecycle registration clears the current-server reference only for the server being stopped; the reference is volatile. Configuration readers/writers use try-with-resources. The mod owns no worker thread or closeable runtime client.
+
+No clear production bug was changed in this review. Decisions left unchanged:
+
+- `/setupscoreboard` reuses objectives named Health, Deaths or Kills even if another administrator created them with a different criterion. Replacing them would destroy existing score data. Recommendation: explicitly reject a conflicting criterion with a useful command error rather than replacing it; confirm that policy first.
+- `disable_item_cooldowns` blocks new cooldowns, but does not clear a cooldown already running when the rule is enabled. Recommendation: keep that prospective behavior unless immediate clearing is wanted.
+- Commands use English server-side literals. This avoids untranslated custom keys for clients without the mod, but does not localize the feedback. Recommendation: retain English for this server-only mod unless a client resource pack is planned.
+
+The README now states that explicitly preferred curses are allowed, matching the existing selector behavior. No change to that behavior was made.
