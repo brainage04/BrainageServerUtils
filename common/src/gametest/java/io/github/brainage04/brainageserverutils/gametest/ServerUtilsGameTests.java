@@ -14,6 +14,7 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.ServerScoreboard;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
@@ -21,10 +22,12 @@ import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.monster.zombie.Zombie;
+import net.minecraft.world.entity.projectile.arrow.Arrow;
 import net.minecraft.world.inventory.AnvilMenu;
 import net.minecraft.world.inventory.EnchantmentMenu;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.ItemUtils;
 import net.minecraft.world.item.component.BlocksAttacks;
 import net.minecraft.world.item.component.Consumable;
 import net.minecraft.world.item.enchantment.Enchantment;
@@ -33,6 +36,9 @@ import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.gamerules.GameRule;
 import net.minecraft.world.level.gamerules.GameRules;
+import net.minecraft.world.scores.DisplaySlot;
+import net.minecraft.world.scores.Objective;
+import net.minecraft.world.scores.criteria.ObjectiveCriteria;
 
 /// GameTest bodies shared by the Fabric and NeoForge GameTest registrations.
 public final class ServerUtilsGameTests {
@@ -103,6 +109,127 @@ public final class ServerUtilsGameTests {
             assertEquals(5, chestplate.getDamageValue(), "Expected vanilla durability loss on the worn armour");
         } finally {
             resetRules(helper);
+        }
+        helper.succeed();
+    }
+
+    public static void bucketRulePreservesSourceWithoutDuplicatingResults(GameTestHelper helper) {
+        ServerPlayer player = survivalPlayer(helper);
+        try {
+            assertTrue(!player.hasInfiniteMaterials(), "Expected survival bucket consumption");
+            for (boolean preserveItems : List.of(false, true)) {
+                setRule(helper, ModGameRules.DISABLE_ITEM_DECREMENT, preserveItems);
+                setRule(helper, ModGameRules.DISABLE_BUCKET_DECREMENT, false);
+                player.getInventory().clearContent();
+                ItemStack source = new ItemStack(Items.BUCKET);
+                ItemStack result = ItemUtils.createFilledResult(source, player, new ItemStack(Items.WATER_BUCKET));
+                assertTrue(result.is(Items.WATER_BUCKET) && source.isEmpty(),
+                        "Expected only the bucket rule, not the item rule, to preserve a bucket");
+
+                setRule(helper, ModGameRules.DISABLE_BUCKET_DECREMENT, true);
+                source = new ItemStack(Items.BUCKET, 2);
+                result = ItemUtils.createFilledResult(source, player, new ItemStack(Items.WATER_BUCKET));
+                assertTrue(result == source, "Expected to keep holding the source buckets");
+                assertEquals(2, source.getCount(), "Expected source bucket count to be preserved");
+                assertEquals(1, player.getInventory().countItem(Items.WATER_BUCKET), "Expected a filled bucket");
+                ItemUtils.createFilledResult(source, player, new ItemStack(Items.WATER_BUCKET));
+                assertEquals(1, player.getInventory().countItem(Items.WATER_BUCKET),
+                        "Expected repeated filling not to duplicate a filled bucket already in inventory");
+            }
+        } finally {
+            resetRules(helper);
+            helper.getLevel().getServer().getPlayerList().remove(player);
+        }
+        helper.succeed();
+    }
+
+    public static void preservedAmmunitionCannotBePickedUp(GameTestHelper helper) {
+        ServerPlayer player = survivalPlayer(helper);
+        try {
+            player.getInventory().clearContent();
+            player.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(Items.BOW));
+            player.setItemSlot(EquipmentSlot.OFFHAND, new ItemStack(Items.ARROW, 3));
+            setRule(helper, ModGameRules.DISABLE_ITEM_DECREMENT, true);
+            Arrow preserved = shootArrow(helper, player);
+            assertEquals(3, player.getOffhandItem().getCount(), "Expected firing not to consume ammunition");
+            setRule(helper, ModGameRules.DISABLE_ITEM_DECREMENT, false);
+            preserved.setNoPhysics(true);
+            preserved.playerTouch(player);
+            assertTrue(!preserved.isRemoved(), "Expected the preserved arrow not to be picked up after disabling the rule");
+            assertEquals(3, player.getOffhandItem().getCount(), "Expected no duplicated ammunition");
+            preserved.discard();
+
+            Arrow ordinary = shootArrow(helper, player);
+            assertEquals(2, player.getOffhandItem().getCount(), "Expected vanilla ammunition consumption");
+            ordinary.setNoPhysics(true);
+            ordinary.playerTouch(player);
+            assertTrue(ordinary.isRemoved(), "Expected vanilla arrow pickup");
+            assertEquals(3, player.getOffhandItem().getCount(), "Expected the fired arrow to return to the stack");
+        } finally {
+            helper.getLevel().getEntitiesOfClass(Arrow.class, player.getBoundingBox().inflate(4),
+                    arrow -> arrow.getOwner() == player).forEach(Arrow::discard);
+            resetRules(helper);
+            helper.getLevel().getServer().getPlayerList().remove(player);
+        }
+        helper.succeed();
+    }
+
+    private static Arrow shootArrow(GameTestHelper helper, ServerPlayer player) {
+        ItemStack bow = player.getMainHandItem();
+        assertTrue(bow.getItem().releaseUsing(bow, helper.getLevel(), player, bow.getUseDuration(player) - 20),
+                "Expected a fully drawn bow to fire");
+        List<Arrow> arrows = helper.getLevel().getEntitiesOfClass(Arrow.class, player.getBoundingBox().inflate(4),
+                arrow -> arrow.getOwner() == player && !arrow.isRemoved());
+        assertEquals(1, arrows.size(), "Expected one fired arrow");
+        return arrows.getFirst();
+    }
+
+    public static void scoreboardTracksHealthDeathsAndPlayerKills(GameTestHelper helper) {
+        MinecraftServer server = helper.getLevel().getServer();
+        ServerScoreboard scoreboard = server.getScoreboard();
+        List<Objective> originalObjectives = List.copyOf(scoreboard.getObjectives());
+        Objective belowName = scoreboard.getDisplayObjective(DisplaySlot.BELOW_NAME);
+        Objective list = scoreboard.getDisplayObjective(DisplaySlot.LIST);
+        Objective sidebar = scoreboard.getDisplayObjective(DisplaySlot.SIDEBAR);
+        ServerPlayer killer = survivalPlayer(helper);
+        ServerPlayer victim = survivalPlayer(helper);
+        try {
+            run(server, server.createCommandSourceStack().withSuppressedOutput(), "setupscoreboard");
+            Objective health = scoreboard.getObjective("Health");
+            Objective deaths = scoreboard.getObjective("Deaths");
+            Objective kills = scoreboard.getObjective("Kills");
+            assertTrue(health != null && health.getCriteria() == ObjectiveCriteria.HEALTH
+                            && scoreboard.getDisplayObjective(DisplaySlot.BELOW_NAME) == health,
+                    "Expected health below player names");
+            assertTrue(deaths != null && deaths.getCriteria() == ObjectiveCriteria.DEATH_COUNT
+                            && scoreboard.getDisplayObjective(DisplaySlot.LIST) == deaths,
+                    "Expected deaths in the player list");
+            assertTrue(kills != null && kills.getCriteria() == ObjectiveCriteria.KILL_COUNT_PLAYERS
+                            && scoreboard.getDisplayObjective(DisplaySlot.SIDEBAR) == kills,
+                    "Expected player kills in the sidebar");
+            killer.setHealth(7.0F);
+            killer.doTick();
+            assertEquals(7, scoreboard.getPlayerScoreInfo(killer, health).value(), "Expected health to update from the player");
+            assertTrue(victim.hurtServer(helper.getLevel(), victim.damageSources().playerAttack(killer), 1000.0F),
+                    "Expected lethal player damage");
+            assertEquals(1, scoreboard.getPlayerScoreInfo(victim, deaths).value(), "Expected a death to increment Deaths");
+            assertEquals(1, scoreboard.getPlayerScoreInfo(killer, kills).value(), "Expected a player kill to increment Kills");
+            run(server, server.createCommandSourceStack().withSuppressedOutput(), "setupscoreboard");
+            assertTrue(scoreboard.getObjective("Kills") == kills, "Expected repeated setup to reuse the objective");
+            assertEquals(1, scoreboard.getPlayerScoreInfo(killer, kills).value(), "Expected repeated setup to retain scores");
+        } finally {
+            scoreboard.resetAllPlayerScores(killer);
+            scoreboard.resetAllPlayerScores(victim);
+            for (Objective objective : List.copyOf(scoreboard.getObjectives())) {
+                if (!originalObjectives.contains(objective)) {
+                    scoreboard.removeObjective(objective);
+                }
+            }
+            scoreboard.setDisplayObjective(DisplaySlot.BELOW_NAME, belowName);
+            scoreboard.setDisplayObjective(DisplaySlot.LIST, list);
+            scoreboard.setDisplayObjective(DisplaySlot.SIDEBAR, sidebar);
+            server.getPlayerList().remove(killer);
+            server.getPlayerList().remove(victim);
         }
         helper.succeed();
     }

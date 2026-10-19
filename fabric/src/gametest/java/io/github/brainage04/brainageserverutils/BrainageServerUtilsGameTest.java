@@ -21,6 +21,21 @@ public final class BrainageServerUtilsGameTest {
     }
 
     @GameTest
+    public void bucketRulePreservesSourceWithoutDuplicatingResults(GameTestHelper helper) {
+        ServerUtilsGameTests.bucketRulePreservesSourceWithoutDuplicatingResults(helper);
+    }
+
+    @GameTest
+    public void preservedAmmunitionCannotBePickedUp(GameTestHelper helper) {
+        ServerUtilsGameTests.preservedAmmunitionCannotBePickedUp(helper);
+    }
+
+    @GameTest
+    public void scoreboardTracksHealthDeathsAndPlayerKills(GameTestHelper helper) {
+        ServerUtilsGameTests.scoreboardTracksHealthDeathsAndPlayerKills(helper);
+    }
+
+    @GameTest
     public void maxEnchantResolvesConflictsByPreference(GameTestHelper helper) {
         ServerUtilsGameTests.maxEnchantResolvesConflictsByPreference(helper);
     }
