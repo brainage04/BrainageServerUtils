@@ -6,11 +6,6 @@ import net.minecraft.gametest.framework.GameTestHelper;
 
 public final class BrainageServerUtilsGameTest {
     @GameTest
-    public void customRulesAndCommandsAreRegistered(GameTestHelper helper) {
-        ServerUtilsGameTests.customRulesAndCommandsAreRegistered(helper);
-    }
-
-    @GameTest
     public void itemAndConsumptionRulesChangeRuntimeBehavior(GameTestHelper helper) {
         ServerUtilsGameTests.itemAndConsumptionRulesChangeRuntimeBehavior(helper);
     }

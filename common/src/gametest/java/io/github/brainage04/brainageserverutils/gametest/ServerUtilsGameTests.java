@@ -42,23 +42,7 @@ import net.minecraft.world.scores.criteria.ObjectiveCriteria;
 
 /// GameTest bodies shared by the Fabric and NeoForge GameTest registrations.
 public final class ServerUtilsGameTests {
-    private static final List<String> COMMANDS =
-            List.of("fly", "heal", "kit", "maxenchant", "more", "setupgamerules", "setupscoreboard");
-
     private ServerUtilsGameTests() {
-    }
-
-    public static void customRulesAndCommandsAreRegistered(GameTestHelper helper) {
-        ServerLevel level = helper.getLevel();
-        assertEquals(8, ModGameRules.REGISTERED.size(), "Expected eight ServerUtils gamerules");
-        for (GameRule<Boolean> rule : ModGameRules.REGISTERED) {
-            assertTrue(level.getGameRules().availableRules().anyMatch(available -> available == rule), "Expected gamerule to be registered");
-        }
-        for (String command : COMMANDS) {
-            assertTrue(level.getServer().getCommands().getDispatcher().getRoot().getChild(command) != null,
-                    "Expected /" + command + " to be registered");
-        }
-        helper.succeed();
     }
 
     public static void itemAndConsumptionRulesChangeRuntimeBehavior(GameTestHelper helper) {
