@@ -1,7 +1,7 @@
 # Development
 
 ```shell
-./gradlew --no-daemon build runAllGameTests -Pfabricmoddingconventions.devClientOptions=/nonexistent
+./gradlew --no-daemon build runAllGameTests
 ```
 
 Production GameTests validate entrypoint initialization, gameplay mixins, and commands on each loader. The shared GameTest bodies live in `common/src/gametest` and are compiled into each loader's GameTest source set.
