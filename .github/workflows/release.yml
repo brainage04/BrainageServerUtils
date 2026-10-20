@@ -14,6 +14,7 @@ jobs:
       contents: write
     uses: brainage04/MinecraftModConventions/.github/workflows/reusable-multiloader-release.yml@v3.0.1
     with:
+      prepare_siblings: BrainageLib
       additional_artifact_pattern: brainageserverutils-neoforge-*.jar
       modrinth_project_id: ${{ vars.MODRINTH_PROJECT_ID }}
       curseforge_project_id: ${{ vars.CURSEFORGE_PROJECT_ID }}

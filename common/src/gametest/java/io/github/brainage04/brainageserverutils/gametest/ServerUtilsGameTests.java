@@ -1,7 +1,7 @@
 package io.github.brainage04.brainageserverutils.gametest;
 
 import com.mojang.authlib.GameProfile;
-import io.netty.channel.embedded.EmbeddedChannel;
+import io.github.brainage04.brainagelib.gametest.GameTestPlayer;
 import io.github.brainage04.brainageserverutils.config.EnchantmentRankings;
 import io.github.brainage04.brainageserverutils.enchantment.MaxEnchantment;
 import io.github.brainage04.brainageserverutils.gamerule.ModGameRules;
@@ -9,26 +9,26 @@ import io.github.brainage04.brainageserverutils.util.ShownAbilities;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.IdentityHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.function.Consumer;
 import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.gametest.framework.GameTestHelper;
-import net.minecraft.network.Connection;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.protocol.PacketFlow;
 import net.minecraft.network.protocol.game.ClientboundPlayerAbilitiesPacket;
 import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.ServerScoreboard;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.server.network.CommonListenerCookie;
 import net.minecraft.server.permissions.PermissionSet;
 import net.minecraft.world.SimpleMenuProvider;
 import net.minecraft.world.effect.MobEffectInstance;
@@ -57,6 +57,8 @@ import net.minecraft.world.scores.criteria.ObjectiveCriteria;
 
 /// GameTest bodies shared by the Fabric and NeoForge GameTest registrations.
 public final class ServerUtilsGameTests {
+    private static final Map<ServerPlayer, GameTestPlayer> JOINED_PLAYERS = new IdentityHashMap<>();
+
     private ServerUtilsGameTests() {
     }
 
@@ -539,24 +541,26 @@ public final class ServerUtilsGameTests {
         helper.succeed();
     }
 
+    /// A loaded survival player joined through BrainageLib's GameTestPlayer, standing on the test floor.
     private static ServerPlayer survivalPlayer(GameTestHelper helper) {
-        ServerLevel level = helper.getLevel();
         UUID id = UUID.randomUUID();
-        CommonListenerCookie cookie = CommonListenerCookie.createInitial(new GameProfile(id, "bsu-" + id.toString().substring(0, 8)), false);
-        ServerPlayer player = new ServerPlayer(level.getServer(), level, cookie.gameProfile(), cookie.clientInformation());
-        Connection connection = new Connection(PacketFlow.SERVERBOUND);
-        new EmbeddedChannel(connection);
-        level.getServer().getPlayerList().placeNewPlayer(connection, player, cookie);
-        player.connection.handleAcceptPlayerLoad(new net.minecraft.network.protocol.game.ServerboundPlayerLoadedPacket());
-        player.setGameMode(GameType.SURVIVAL);
-        var position = helper.absolutePos(new net.minecraft.core.BlockPos(1, 2, 1));
-        player.snapTo(position.getX() + 0.5, position.getY(), position.getZ() + 0.5);
-        return player;
+        GameTestPlayer fixture = GameTestPlayer.join(helper, new GameProfile(id, "bsu-" + id.toString().substring(0, 8)))
+                .markLoaded()
+                .gameMode(GameType.SURVIVAL)
+                .moveTo(helper, new BlockPos(1, 2, 1));
+        synchronized (JOINED_PLAYERS) {
+            JOINED_PLAYERS.put(fixture.player(), fixture);
+        }
+        return fixture.player();
     }
 
+    /// Removes the player from the server and releases its connection.
     private static void removePlayer(ServerPlayer player) {
-        player.level().getServer().getPlayerList().remove(player);
-        player.connection.disconnect(Component.literal("GameTest finished"));
+        GameTestPlayer fixture;
+        synchronized (JOINED_PLAYERS) {
+            fixture = JOINED_PLAYERS.remove(player);
+        }
+        fixture.close();
     }
 
     private static void run(MinecraftServer server, CommandSourceStack source, String command) {
