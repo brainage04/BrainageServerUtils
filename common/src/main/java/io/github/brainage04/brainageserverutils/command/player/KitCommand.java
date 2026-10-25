@@ -17,6 +17,7 @@ import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.util.Prediction;
 import net.minecraft.util.Unit;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -78,7 +79,8 @@ public final class KitCommand {
                     MaxEnchantment.apply(stack, enchantments, rankings, List.of());
                     stack.set(DataComponents.UNBREAKABLE, Unit.INSTANCE);
                 }
-                player.getInventory().placeItemBackInInventory(stack);
+                // The client predicted nothing: the server alone hands out the kit (as advancement rewards do).
+                player.getInventory().placeItemBackInInventory(stack, Prediction.SERVER_ONLY);
             }
         }
         PlayerTargets.sendSuccess(source, "Gave the " + kit.commandName() + " kit to", targets);
