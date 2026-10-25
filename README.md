@@ -1,6 +1,6 @@
 # BrainageServerUtils
 
-A server-side utility mod for Fabric and NeoForge on Minecraft 26.2. Clients do not need to install the mod.
+A server-side utility mod for Fabric and NeoForge on Minecraft 26.3. Clients do not need to install the mod.
 
 ## Features
 
@@ -10,8 +10,8 @@ A server-side utility mod for Fabric and NeoForge on Minecraft 26.2. Clients do 
 
 ## Getting started
 
-- Minecraft 26.2
-- Fabric Loader 0.19.3 or newer with Fabric API, or NeoForge 26.2.0.88 or newer
+- Minecraft 26.3
+- Fabric Loader 0.19.5 or newer with Fabric API, or NeoForge 26.3.0.99 or newer
 - Java 25 or newer
 - Install on the server.
 
