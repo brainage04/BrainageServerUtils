@@ -34,6 +34,8 @@ import net.minecraft.world.SimpleMenuProvider;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.EntitySpawnReason;
+import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.monster.zombie.Zombie;
@@ -391,6 +393,24 @@ public final class ServerUtilsGameTests {
             var fireworks = findItem(player, Items.FIREWORK_ROCKET).get(DataComponents.FIREWORKS);
             assertTrue(fireworks != null && fireworks.flightDuration() == 3 && fireworks.explosions().isEmpty(),
                     "Expected flight-duration-3 rockets without explosions");
+
+            // A full inventory drops the kit at the player's feet (Prediction.SERVER_ONLY since 26.3).
+            player.getInventory().clearContent();
+            for (int slot = 0; slot < Inventory.INVENTORY_SIZE; slot++) {
+                player.getInventory().setItem(slot, new ItemStack(Items.DIRT, 64));
+            }
+            run(server, source, "kit elytra");
+            List<ItemEntity> dropped = player.level().getEntitiesOfClass(ItemEntity.class, player.getBoundingBox().inflate(4.0));
+            try {
+                assertTrue(dropped.stream().anyMatch(item -> item.getItem().is(Items.ELYTRA)
+                                && item.getItem().has(DataComponents.UNBREAKABLE)),
+                        "Expected the kit elytra to drop when the inventory is full");
+                assertTrue(dropped.stream().anyMatch(item -> item.getItem().is(Items.FIREWORK_ROCKET)),
+                        "Expected the kit rockets to drop when the inventory is full");
+                assertEquals(64, player.getInventory().getItem(0).getCount(), "Expected the full inventory to stay unchanged");
+            } finally {
+                dropped.forEach(ItemEntity::discard);
+            }
 
             player.getInventory().clearContent();
             player.getInventory().setSelectedSlot(0);
