@@ -50,6 +50,7 @@ import net.minecraft.world.item.component.Consumable;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.Enchantments;
+import net.minecraft.world.item.enchantment.ItemEnchantments;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.gamerules.GameRule;
 import net.minecraft.world.level.gamerules.GameRules;
@@ -558,6 +559,170 @@ public final class ServerUtilsGameTests {
             }
         }
         helper.succeed();
+    }
+
+    /// A rankings file written by the previous version loads unchanged and keeps its bytes through commands and a restart.
+    public static void rankingsFromPreviousVersionLoad(GameTestHelper helper) {
+        Path path = EnchantmentRankings.path();
+        byte[] original = null;
+        ServerPlayer player = null;
+        // Exactly the bytes the previous version wrote for a hand-edited file: pretty Gson, no trailing newline.
+        String previous = """
+                {
+                  "enchantment_rankings": [
+                    [
+                      "minecraft:smite",
+                      "minecraft:sharpness"
+                    ]
+                  ]
+                }""";
+        try {
+            original = Files.readAllBytes(path);
+            Files.writeString(path, previous);
+            EnchantmentRankings.initialize(path.getParent());
+            List<List<Identifier>> loaded = EnchantmentRankings.load();
+            assertTrue(loaded.equals(List.of(List.of(Enchantments.SMITE.identifier(), Enchantments.SHARPNESS.identifier()))),
+                    "Expected the previous version's rankings to load in order, got " + loaded);
+            player = survivalPlayer(helper);
+            player.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(Items.DIAMOND_SWORD));
+            run(helper.getLevel().getServer(), helper.getLevel().getServer().createCommandSourceStack()
+                    .withEntity(player).withSuppressedOutput(), "maxenchant");
+            assertEquals(5, level(helper, Enchantments.SMITE, player.getMainHandItem()),
+                    "Expected the previous version's rankings to decide the conflict");
+            // The mod start is where BSU writes the file; the server stop has nothing to save.
+            EnchantmentRankings.initialize(path.getParent());
+            EnchantmentRankings.load();
+            assertTrue(Files.readString(path).equals(previous),
+                    "Expected a loaded rankings file to keep its previous bytes, got:\n" + Files.readString(path));
+        } catch (IOException | EnchantmentRankings.InvalidConfigException exception) {
+            throw new AssertionError("Could not exercise the test server's rankings file", exception);
+        } finally {
+            if (player != null) {
+                removePlayer(player);
+            }
+            restoreRankings(path, original);
+        }
+        helper.succeed();
+    }
+
+    /// The recreated default rankings file matches the previous version's format byte for byte.
+    public static void defaultRankingsKeepPreviousFormat(GameTestHelper helper) {
+        Path path = EnchantmentRankings.path();
+        byte[] original = null;
+        // The previous version's default file, captured from a real install: pretty Gson, no trailing newline.
+        String expected = """
+                {
+                  "enchantment_rankings": [
+                    [
+                      "minecraft:sharpness",
+                      "minecraft:density",
+                      "minecraft:breach",
+                      "minecraft:smite",
+                      "minecraft:bane_of_arthropods",
+                      "minecraft:impaling"
+                    ],
+                    [
+                      "minecraft:protection",
+                      "minecraft:blast_protection",
+                      "minecraft:fire_protection",
+                      "minecraft:projectile_protection"
+                    ],
+                    [
+                      "minecraft:infinity",
+                      "minecraft:mending"
+                    ],
+                    [
+                      "minecraft:fortune",
+                      "minecraft:silk_touch"
+                    ],
+                    [
+                      "minecraft:multishot",
+                      "minecraft:piercing"
+                    ],
+                    [
+                      "minecraft:depth_strider",
+                      "minecraft:frost_walker"
+                    ],
+                    [
+                      "minecraft:loyalty",
+                      "minecraft:channeling",
+                      "minecraft:riptide"
+                    ]
+                  ]
+                }""";
+        try {
+            original = Files.readAllBytes(path);
+            Files.deleteIfExists(path);
+            EnchantmentRankings.initialize(path.getParent());
+            String recreated = Files.readString(path);
+            assertTrue(recreated.equals(expected),
+                    "Expected the recreated defaults to match the previous version's format, got:\n" + recreated);
+            assertTrue(EnchantmentRankings.load().equals(EnchantmentRankings.defaults()),
+                    "Expected the recreated defaults to load");
+        } catch (IOException | EnchantmentRankings.InvalidConfigException exception) {
+            throw new AssertionError("Could not exercise the test server's rankings file", exception);
+        } finally {
+            restoreRankings(path, original);
+        }
+        helper.succeed();
+    }
+
+    /// An unreadable rankings file is reported and kept byte for byte; commands change nothing and no restart rewrites it.
+    public static void unreadableRankingsAreNotOverwritten(GameTestHelper helper) {
+        Path path = EnchantmentRankings.path();
+        byte[] original = null;
+        ServerPlayer player = null;
+        try {
+            original = Files.readAllBytes(path);
+            for (String broken : List.of(
+                    "{\n  \"enchantment_rankings\": [\n    [\"minecraft:smite\"\n  ]\n}",
+                    "{\"enchantment_rankings\":[[\"minecraft:smite\"],[\"minecraft:smite\"]]}")) {
+                Files.writeString(path, broken);
+                EnchantmentRankings.initialize(path.getParent());
+                assertRankingsRejected("Expected an unreadable file to be rejected: " + broken);
+                player = survivalPlayer(helper);
+                player.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(Items.DIAMOND_SWORD));
+                run(helper.getLevel().getServer(), helper.getLevel().getServer().createCommandSourceStack()
+                        .withEntity(player).withSuppressedOutput(), "maxenchant");
+                assertTrue(player.getMainHandItem()
+                                .getOrDefault(DataComponents.ENCHANTMENTS, ItemEnchantments.EMPTY).isEmpty(),
+                        "Expected an unreadable file to leave the held item unchanged");
+                removePlayer(player);
+                player = null;
+                // The mod start is where BSU writes the file; the server stop has nothing to save.
+                EnchantmentRankings.initialize(path.getParent());
+                assertRankingsRejected("Expected the file to stay unreadable after a restart: " + broken);
+                assertTrue(Files.readString(path).equals(broken),
+                        "Expected an unreadable file to be kept byte for byte, got:\n" + Files.readString(path));
+            }
+        } catch (IOException exception) {
+            throw new AssertionError("Could not exercise the test server's rankings file", exception);
+        } finally {
+            if (player != null) {
+                removePlayer(player);
+            }
+            restoreRankings(path, original);
+        }
+        helper.succeed();
+    }
+
+    private static void assertRankingsRejected(String message) {
+        boolean rejected = false;
+        try {
+            EnchantmentRankings.load();
+        } catch (EnchantmentRankings.InvalidConfigException expected) {
+            rejected = true;
+        }
+        assertTrue(rejected, message);
+    }
+
+    private static void restoreRankings(Path path, byte[] original) {
+        try {
+            Files.write(path, original);
+            EnchantmentRankings.initialize(path.getParent());
+        } catch (IOException exception) {
+            throw new AssertionError("Could not restore the test server's rankings file", exception);
+        }
     }
 
     private static ServerPlayer survivalPlayer(GameTestHelper helper) {

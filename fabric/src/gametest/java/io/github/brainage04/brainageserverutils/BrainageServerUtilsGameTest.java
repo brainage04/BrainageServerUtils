@@ -59,4 +59,19 @@ public final class BrainageServerUtilsGameTest {
     public void rankingsReloadAndRejectInvalidConfiguration(GameTestHelper helper) {
         ServerUtilsGameTests.runIsolated(helper, ServerUtilsGameTests::rankingsReloadAndRejectInvalidConfiguration);
     }
+
+    @GameTest
+    public void rankingsFromPreviousVersionLoad(GameTestHelper helper) {
+        ServerUtilsGameTests.runIsolated(helper, ServerUtilsGameTests::rankingsFromPreviousVersionLoad);
+    }
+
+    @GameTest
+    public void defaultRankingsKeepPreviousFormat(GameTestHelper helper) {
+        ServerUtilsGameTests.runIsolated(helper, ServerUtilsGameTests::defaultRankingsKeepPreviousFormat);
+    }
+
+    @GameTest
+    public void unreadableRankingsAreNotOverwritten(GameTestHelper helper) {
+        ServerUtilsGameTests.runIsolated(helper, ServerUtilsGameTests::unreadableRankingsAreNotOverwritten);
+    }
 }

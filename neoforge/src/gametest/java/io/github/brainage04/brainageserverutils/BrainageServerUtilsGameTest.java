@@ -24,7 +24,10 @@ public final class BrainageServerUtilsGameTest {
             Map.entry("enchanting_rules_waive_level_costs_and_cap", ServerUtilsGameTests::enchantingRulesWaiveLevelCostsAndCap),
             Map.entry("player_commands_affect_their_targets", ServerUtilsGameTests::playerCommandsAffectTheirTargets),
             Map.entry("flight_and_enchanting_abilities_follow_menu_and_game_mode", ServerUtilsGameTests::flightAndEnchantingAbilitiesFollowMenuAndGameMode),
-            Map.entry("rankings_reload_and_reject_invalid_configuration", ServerUtilsGameTests::rankingsReloadAndRejectInvalidConfiguration)
+            Map.entry("rankings_reload_and_reject_invalid_configuration", ServerUtilsGameTests::rankingsReloadAndRejectInvalidConfiguration),
+            Map.entry("rankings_from_previous_version_load", ServerUtilsGameTests::rankingsFromPreviousVersionLoad),
+            Map.entry("default_rankings_keep_previous_format", ServerUtilsGameTests::defaultRankingsKeepPreviousFormat),
+            Map.entry("unreadable_rankings_are_not_overwritten", ServerUtilsGameTests::unreadableRankingsAreNotOverwritten)
     );
 
     private BrainageServerUtilsGameTest() {
