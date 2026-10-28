@@ -4,6 +4,10 @@ sourceSets.matching { it.name == 'gametest' }.configureEach {
 }
 
 workspaceDependencies {
+	siblingMaven('BrainageLib') {
+		coordinate.set("io.github.brainage04:brainagelib-neoforge:${rootProject.brainagelib_version}")
+		siblingDirectory.set(rootProject.layout.projectDirectory.dir('../BrainageLib'))
+	}
 	siblingMaven('BrainageLibGameTest') {
 		coordinate.set("io.github.brainage04:brainagelib-gametest:${rootProject.brainagelib_version}")
 		siblingDirectory.set(rootProject.layout.projectDirectory.dir('../BrainageLib'))
@@ -11,6 +15,8 @@ workspaceDependencies {
 }
 
 dependencies {
+	implementation "io.github.brainage04:brainagelib-neoforge:${rootProject.brainagelib_version}"
+	productionRuntimeMods "io.github.brainage04:brainagelib-neoforge:${rootProject.brainagelib_version}"
 	// Test-only GameTest fixtures; productionRuntimeMods feeds the production GameTest runs, not the release JAR.
 	gametestImplementation "io.github.brainage04:brainagelib-gametest:${rootProject.brainagelib_version}"
 	productionRuntimeMods "io.github.brainage04:brainagelib-gametest:${rootProject.brainagelib_version}"

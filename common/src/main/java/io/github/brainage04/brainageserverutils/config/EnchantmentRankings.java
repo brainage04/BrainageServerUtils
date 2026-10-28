@@ -6,12 +6,9 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
-import com.google.gson.JsonParser;
+import com.google.gson.JsonSyntaxException;
+import io.github.brainage04.brainagelib.storage.JsonFile;
 import io.github.brainage04.brainageserverutils.BrainageServerUtils;
-import java.io.IOException;
-import java.io.Reader;
-import java.io.Writer;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -22,7 +19,9 @@ import net.minecraft.resources.Identifier;
 /// Ranked enchantment preferences used by `/maxenchant` and `/kit` to decide between mutually exclusive enchantments.
 ///
 /// Each ranking lists enchantments from most to least preferred. The file is read on every use, so edits apply
-/// without a restart.
+/// without a restart. Saving goes through BrainageLib's [JsonFile], which replaces the file atomically and keeps a
+/// file that failed to load: an unreadable `brainageserverutils.json` is never overwritten, and every command that
+/// needs the rankings reports the problem instead.
 public final class EnchantmentRankings {
     public static final String FILE_NAME = "brainageserverutils.json";
     private static final String RANKINGS_KEY = "enchantment_rankings";
@@ -39,20 +38,26 @@ public final class EnchantmentRankings {
             List.of("minecraft:loyalty", "minecraft:channeling", "minecraft:riptide")
     );
 
-    private static Path path;
+    private static JsonFile<Document> file;
 
     private EnchantmentRankings() {
     }
 
     public static void initialize(Path configDirectory) {
-        path = configDirectory.resolve(FILE_NAME);
-        if (!Files.exists(path)) {
-            writeDefaults();
+        file = JsonFile.builder(configDirectory.resolve(FILE_NAME), GSON, Document.class)
+                .decoder(EnchantmentRankings::decode)
+                .description("BrainageServerUtils enchantment rankings")
+                .logger(BrainageServerUtils.LOGGER)
+                .build();
+        switch (file.load()) {
+            case JsonFile.LoadResult.Missing<Document> missing -> file.save(new Document(DEFAULT_RANKINGS));
+            default -> {
+            }
         }
     }
 
     public static Path path() {
-        return path;
+        return file.path();
     }
 
     public static List<List<Identifier>> defaults() {
@@ -63,60 +68,66 @@ public final class EnchantmentRankings {
 
     /// Reads the rankings from disk, recreating the default file when it is missing.
     public static List<List<Identifier>> load() throws InvalidConfigException {
-        if (!Files.exists(path)) {
-            writeDefaults();
-            return defaults();
-        }
-
-        JsonElement document;
-        try (Reader reader = Files.newBufferedReader(path)) {
-            document = JsonParser.parseReader(reader);
-        } catch (IOException | JsonParseException exception) {
-            throw new InvalidConfigException("could not be read: " + exception.getMessage());
-        }
-        return parse(document);
+        return switch (file.load()) {
+            case JsonFile.LoadResult.Loaded<Document>(Document document) ->
+                    toIdentifiers(document.enchantment_rankings());
+            case JsonFile.LoadResult.Missing<Document> missing -> {
+                file.save(new Document(DEFAULT_RANKINGS));
+                yield defaults();
+            }
+            case JsonFile.LoadResult.Invalid<Document> invalid ->
+                    throw new InvalidConfigException(problem(invalid.exception()));
+            case JsonFile.LoadResult.IoError<Document> ioError ->
+                    throw new InvalidConfigException("could not be read: " + ioError.exception().getMessage());
+        };
     }
 
-    private static List<List<Identifier>> parse(JsonElement document) throws InvalidConfigException {
+    /// Rejects anything that is not a document of unique, valid enchantment IDs, keeping the strings as written.
+    private static Document decode(JsonElement document) {
         if (!(document instanceof JsonObject object) || !(object.get(RANKINGS_KEY) instanceof JsonArray rankingsJson)) {
-            throw new InvalidConfigException("must be an object with an \"" + RANKINGS_KEY + "\" array");
+            throw new JsonParseException("must be an object with an \"" + RANKINGS_KEY + "\" array");
         }
 
-        List<List<Identifier>> rankings = new ArrayList<>();
+        List<List<String>> rankings = new ArrayList<>();
         Set<Identifier> seen = new HashSet<>();
         for (JsonElement rankingJson : rankingsJson) {
             if (!(rankingJson instanceof JsonArray entries)) {
-                throw new InvalidConfigException("each ranking must be an array of enchantment IDs");
+                throw new JsonParseException("each ranking must be an array of enchantment IDs");
             }
-            List<Identifier> ranking = new ArrayList<>();
+            List<String> ranking = new ArrayList<>();
             for (JsonElement entry : entries) {
-                Identifier id = entry.isJsonPrimitive() && entry.getAsJsonPrimitive().isString()
-                        ? Identifier.tryParse(entry.getAsString())
+                String value = entry.isJsonPrimitive() && entry.getAsJsonPrimitive().isString()
+                        ? entry.getAsString()
                         : null;
+                Identifier id = value == null ? null : Identifier.tryParse(value);
                 if (id == null) {
-                    throw new InvalidConfigException("contains an invalid enchantment ID: " + entry);
+                    throw new JsonParseException("contains an invalid enchantment ID: " + entry);
                 }
                 if (!seen.add(id)) {
-                    throw new InvalidConfigException("lists " + id + " in more than one place");
+                    throw new JsonParseException("lists " + id + " in more than one place");
                 }
-                ranking.add(id);
+                ranking.add(value);
             }
             rankings.add(List.copyOf(ranking));
         }
-        return List.copyOf(rankings);
+        return new Document(List.copyOf(rankings));
     }
 
-    private static void writeDefaults() {
-        JsonObject document = new JsonObject();
-        document.add(RANKINGS_KEY, GSON.toJsonTree(DEFAULT_RANKINGS));
-        try {
-            Files.createDirectories(path.getParent());
-            try (Writer writer = Files.newBufferedWriter(path)) {
-                GSON.toJson(document, writer);
-            }
-        } catch (IOException exception) {
-            BrainageServerUtils.LOGGER.error("Failed to write default enchantment rankings to {}", path, exception);
-        }
+    private static List<List<Identifier>> toIdentifiers(List<List<String>> rankings) {
+        return rankings.stream()
+                .map(ranking -> ranking.stream().map(Identifier::parse).toList())
+                .toList();
+    }
+
+    private static String problem(JsonParseException exception) {
+        // Gson's syntax errors are the unreadable-file case; the decoder's own messages are configuration problems.
+        return exception instanceof JsonSyntaxException
+                ? "could not be read: " + exception.getMessage()
+                : exception.getMessage();
+    }
+
+    /// The stored document; the component name is the JSON field, so the file's format is unchanged.
+    private record Document(List<List<String>> enchantment_rankings) {
     }
 
     public static final class InvalidConfigException extends Exception {
