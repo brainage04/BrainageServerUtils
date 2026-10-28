@@ -29,3 +29,10 @@ type="required"
 versionRange="${minecraft_version_range}"
 ordering="NONE"
 side="BOTH"
+
+[[dependencies.brainageserverutils]]
+modId="brainagelib"
+type="required"
+versionRange="[${brainagelib_version},)"
+ordering="AFTER"
+side="SERVER"

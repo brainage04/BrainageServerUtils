@@ -12,8 +12,9 @@ A server-side utility mod for Fabric and NeoForge on Minecraft 26.3. Clients do 
 
 - Minecraft 26.3
 - Fabric Loader 0.19.5 or newer with Fabric API, or NeoForge 26.3.0.99 or newer
+- BrainageLib 1.2.0 or newer for the matching loader
 - Java 25 or newer
-- Install on the server.
+- Install on the server and its dependencies on the server.
 
 ## Commands
 
@@ -50,7 +51,7 @@ Unmodified clients only let a player click an enchanting-table option they can a
 
 ### Enchantment rankings
 
-`config/brainageserverutils.json` decides between mutually exclusive enchantments for `/maxenchant` and `/kit`. Each ranking lists enchantments from most to least preferred, and an enchantment may appear in only one ranking. The file is created with these defaults and re-read on every use, so edits apply without a restart:
+`config/brainageserverutils.json` decides between mutually exclusive enchantments for `/maxenchant` and `/kit`. Each ranking lists enchantments from most to least preferred, and an enchantment may appear in only one ranking. The file is created with these defaults and re-read on every use, so edits apply without a restart. Saving replaces the file atomically, and a file that cannot be read is never overwritten: `/maxenchant` and `/kit` change nothing and report the problem instead, and fixing the file takes effect on the next use:
 
 ```json
 {
