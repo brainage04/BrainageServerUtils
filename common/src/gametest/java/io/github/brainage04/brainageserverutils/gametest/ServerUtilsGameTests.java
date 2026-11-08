@@ -55,7 +55,6 @@ import net.minecraft.world.scores.DisplaySlot;
 import net.minecraft.world.scores.Objective;
 import net.minecraft.world.scores.criteria.ObjectiveCriteria;
 
-/// GameTest bodies shared by the Fabric and NeoForge GameTest registrations.
 public final class ServerUtilsGameTests {
     private static final Map<ServerPlayer, GameTestPlayer> JOINED_PLAYERS = new IdentityHashMap<>();
 
@@ -541,7 +540,6 @@ public final class ServerUtilsGameTests {
         helper.succeed();
     }
 
-    /// A loaded survival player joined through BrainageLib's GameTestPlayer, standing on the test floor.
     private static ServerPlayer survivalPlayer(GameTestHelper helper) {
         UUID id = UUID.randomUUID();
         GameTestPlayer fixture = GameTestPlayer.join(helper, new GameProfile(id, "bsu-" + id.toString().substring(0, 8)))
@@ -554,7 +552,6 @@ public final class ServerUtilsGameTests {
         return fixture.player();
     }
 
-    /// Removes the player from the server and releases its connection.
     private static void removePlayer(ServerPlayer player) {
         GameTestPlayer fixture;
         synchronized (JOINED_PLAYERS) {

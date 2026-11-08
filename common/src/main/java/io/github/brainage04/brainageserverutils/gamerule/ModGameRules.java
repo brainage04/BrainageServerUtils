@@ -22,7 +22,6 @@ public final class ModGameRules {
     private ModGameRules() {
     }
 
-    /// Registers every boolean rule (all default to false) under the mod namespace with the given path.
     public static void initialize(Function<String, GameRule<Boolean>> registrar) {
         DISABLE_DURABILITY = registrar.apply("disable_durability");
         DISABLE_ITEM_DECREMENT = registrar.apply("disable_item_decrement");

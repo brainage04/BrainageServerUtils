@@ -27,7 +27,6 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.Enchantment;
 
-/// `/maxenchant [targets] [preferred enchantments...]`: see [MaxEnchantment] for how conflicts are resolved.
 public final class MaxEnchantCommand {
     private static final int MAX_PREFERENCES = 8;
     private static final SimpleCommandExceptionType NOTHING_ENCHANTED =
@@ -107,7 +106,6 @@ public final class MaxEnchantCommand {
         return enchanted;
     }
 
-    /// Loads the configured rankings and rejects IDs that are not registered enchantments.
     static List<List<Identifier>> loadRankings(HolderLookup.RegistryLookup<Enchantment> enchantments)
             throws CommandSyntaxException {
         List<List<Identifier>> rankings;

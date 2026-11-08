@@ -166,7 +166,6 @@ public final class BrainageServerUtilsClientGameTest implements FabricClientGame
         ));
     }
 
-    /// Repairing a damaged sword with another, both already worked many times, costs well over 40 levels.
     private static void openTooExpensiveAnvil(MinecraftServer server) {
         ServerPlayer player = player(server);
         player.openMenu(new SimpleMenuProvider(

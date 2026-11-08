@@ -24,8 +24,6 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.item.component.Fireworks;
 import net.minecraft.world.item.enchantment.Enchantment;
 
-/// `/kit <preset> [targets]`: gives unbreakable, max-enchanted gear. Enchantment conflicts follow the configured
-/// rankings, exactly as `/maxenchant` does without explicit preferences.
 public final class KitCommand {
     private enum Kit {
         NETHERITE(() -> stacks(
@@ -91,7 +89,6 @@ public final class KitCommand {
         return Stream.of(items).map(ItemStack::new).toList();
     }
 
-    /// Flight-duration-3 rockets without explosions, so boosting an elytra never damages the wearer.
     private static ItemStack fireworks() {
         ItemStack stack = new ItemStack(Items.FIREWORK_ROCKET, Items.FIREWORK_ROCKET.getDefaultMaxStackSize());
         stack.set(DataComponents.FIREWORKS, new Fireworks(3, List.of()));

@@ -19,10 +19,7 @@ import java.util.List;
 import java.util.Set;
 import net.minecraft.resources.Identifier;
 
-/// Ranked enchantment preferences used by `/maxenchant` and `/kit` to decide between mutually exclusive enchantments.
-///
-/// Each ranking lists enchantments from most to least preferred. The file is read on every use, so edits apply
-/// without a restart.
+/// The file is read on every use, so edits apply without a restart.
 public final class EnchantmentRankings {
     public static final String FILE_NAME = "brainageserverutils.json";
     private static final String RANKINGS_KEY = "enchantment_rankings";
@@ -61,7 +58,6 @@ public final class EnchantmentRankings {
                 .toList();
     }
 
-    /// Reads the rankings from disk, recreating the default file when it is missing.
     public static List<List<Identifier>> load() throws InvalidConfigException {
         if (!Files.exists(path)) {
             writeDefaults();

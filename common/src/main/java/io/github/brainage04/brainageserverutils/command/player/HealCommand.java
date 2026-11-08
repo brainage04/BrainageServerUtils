@@ -29,7 +29,6 @@ public final class HealCommand {
         return targets.size();
     }
 
-    /// Restores health, hunger, saturation and air, puts out fire and thaws, and removes harmful effects.
     private static void heal(ServerPlayer player) {
         player.setHealth(player.getMaxHealth());
         FoodData food = player.getFoodData();

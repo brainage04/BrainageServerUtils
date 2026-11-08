@@ -14,7 +14,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(BlocksAttacks.class)
 public abstract class MixinBlocksAttacks {
-    /// Axes and other disabling attacks no longer lower a player's shield or put it on cooldown.
     @Inject(
             method = "disable(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/entity/LivingEntity;FLnet/minecraft/world/item/ItemStack;)V",
             at = @At("HEAD"),
