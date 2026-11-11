@@ -1,8 +1,8 @@
 # BrainageServerUtils icon
 
-## What this is
+## Overview
 
-The mod's icon: `icon.png` — 512x512 RGBA PNG, 2 874 bytes,
+The mod's icon is `icon.png`: a 512x512 RGBA PNG, 2 874 bytes,
 sha256 `1b3c0cb45d934645b3c2c8950068043788070763eb995c94f0379bc03f8ba382`. It is the native
 32x32 composition described below enlarged **16x with NEAREST** (the icon rule of 2026-10-02:
 square, a power of two, 512 or 1024 px). The mod ships byte-identical copies at
@@ -14,16 +14,16 @@ front, the author's own **player head face** enlarged 2x and centred.
 
 ## How it was made
 
-**Method: generated pixel art from vanilla assets.** This is *not* an in-game screenshot and
-*not* a Blender render. It is a deterministic offline composition of official Minecraft
-textures with Pillow — no hand-drawn approximation, and the only pixel operations used are
-integer nearest-neighbour enlargement (2x), alpha compositing, and (elsewhere in the same
-script) a 90° transpose.
+**Method: generated pixel art from vanilla assets**, a deterministic offline composition of
+official Minecraft textures with Pillow (not an in-game screenshot and not a Blender render).
+There is no hand-drawn approximation, and the only pixel operations used are integer
+nearest-neighbour enlargement (2x), alpha compositing, and (elsewhere in the same script) a
+90° transpose.
 
 | | |
 |---|---|
 | Tool | Pillow 12.3.0 on Python 3.13 (`provenance/render.py`, function block `gear`/`skinface`) |
-| Gear source | **Mojang Alpha a1.0.4 `client.jar`**, retained historical `misc/gear.png` (32x32) and `misc/gearmiddle.png` (16x16) — pinned by sha256 in `provenance.json` (`a1cf16ff…`, `b7188fd2…`) |
+| Gear source | **Mojang Alpha a1.0.4 `client.jar`**, retained historical `misc/gear.png` (32x32) and `misc/gearmiddle.png` (16x16), pinned by sha256 in `provenance.json` (`a1cf16ff…`, `b7188fd2…`) |
 | Gear algorithm | the historical frame-0 coordinate sampling: for each of the 16x16 output pixels, sample `gearmiddle`; where its alpha ≤ 128, sample `gear` at `((x/15 - 0.5) * 31 + 16, (y/15 - 0.5) * 31 + 16)` and use it; output alpha is forced to fully opaque or fully transparent at the 128 threshold. Frame 0 is the un-rotated frame, so no rotation is applied |
 | Gear references | `MC-TextureGen` `GearRotationFramesGenerator` (github.com/NeRdTheNed/MC-TextureGen) and minecraft.wiki *Procedural animated texture generation/Gears*, recorded in `derivations.json` |
 | Face source | the author's **own supplied skin**, `sources/supplied-skin.png` (sha256 `e9ebbeec…`), provided locally by the author; it is never fetched by username or UUID |
