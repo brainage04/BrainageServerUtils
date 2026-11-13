@@ -675,6 +675,27 @@ public final class ServerUtilsGameTests {
         helper.succeed();
     }
 
+    /// A dead player still on the death screen must stay dead: the server ignores a respawn request from a player
+    /// whose health is above zero (`ServerGamePacketListenerImpl.handleClientCommand`, 26.3:1959), so a healed corpse
+    /// could never leave the death screen. `@a` and a player name both select dead players (`@a` adds no
+    /// `Entity::isAlive` filter, `EntitySelectorParser`), so both are tried.
+    public static void healLeavesDeadPlayersDead(GameTestHelper helper) {
+        MinecraftServer server = helper.getLevel().getServer();
+        ServerPlayer dead = survivalPlayer(helper);
+        CommandSourceStack console = server.createCommandSourceStack().withSuppressedOutput();
+        try {
+            dead.setHealth(0.0F);
+            run(server, console, "heal " + dead.getScoreboardName());
+            assertTrue(dead.getHealth() == 0.0F, "Expected /heal <name> to leave a dead player dead, found health " + dead.getHealth());
+            run(server, console, "heal @a[name=" + dead.getScoreboardName() + "]");
+            assertTrue(dead.getHealth() == 0.0F, "Expected /heal @a to leave a dead player dead, found health " + dead.getHealth());
+        } finally {
+            dead.setHealth(dead.getMaxHealth());
+            removePlayer(dead);
+        }
+        helper.succeed();
+    }
+
     public static void flightAndEnchantingAbilitiesFollowMenuAndGameMode(GameTestHelper helper) {
         MinecraftServer server = helper.getLevel().getServer();
         ServerPlayer player = survivalPlayer(helper);
