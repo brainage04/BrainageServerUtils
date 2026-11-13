@@ -1,6 +1,7 @@
 package io.github.brainage04.brainageserverutils.gametest;
 
 import com.mojang.authlib.GameProfile;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import io.github.brainage04.brainagelib.gametest.GameTestPlayer;
 import io.github.brainage04.brainageserverutils.config.EnchantmentRankings;
 import io.github.brainage04.brainageserverutils.enchantment.MaxEnchantment;
@@ -447,16 +448,17 @@ public final class ServerUtilsGameTests {
     /// A dead player still on the death screen must stay dead: the server ignores a respawn request from a player
     /// whose health is above zero (`ServerGamePacketListenerImpl.handleClientCommand`, 26.2:1889), so a healed corpse
     /// could never leave the death screen. `@a` and a player name both select dead players (`@a` adds no
-    /// `Entity::isAlive` filter, `EntitySelectorParser`), so both are tried.
+    /// `Entity::isAlive` filter, `EntitySelectorParser`), so both are tried, and both must fail rather than report
+    /// healing nobody.
     public static void healLeavesDeadPlayersDead(GameTestHelper helper) {
         MinecraftServer server = helper.getLevel().getServer();
         ServerPlayer dead = survivalPlayer(helper);
         CommandSourceStack console = server.createCommandSourceStack().withSuppressedOutput();
         try {
             dead.setHealth(0.0F);
-            run(server, console, "heal " + dead.getScoreboardName());
+            runExpectingFailure(server, console, "heal " + dead.getScoreboardName());
             assertTrue(dead.getHealth() == 0.0F, "Expected /heal <name> to leave a dead player dead, found health " + dead.getHealth());
-            run(server, console, "heal @a[name=" + dead.getScoreboardName() + "]");
+            runExpectingFailure(server, console, "heal @a[name=" + dead.getScoreboardName() + "]");
             assertTrue(dead.getHealth() == 0.0F, "Expected /heal @a to leave a dead player dead, found health " + dead.getHealth());
         } finally {
             dead.setHealth(dead.getMaxHealth());
@@ -583,6 +585,17 @@ public final class ServerUtilsGameTests {
 
     private static void run(MinecraftServer server, CommandSourceStack source, String command) {
         server.getCommands().performPrefixedCommand(source, command);
+    }
+
+    /// Runs `command` and fails the test unless it is refused. `run` reports a refused command as a chat line, so a
+    /// command that must fail needs its exception back.
+    private static void runExpectingFailure(MinecraftServer server, CommandSourceStack source, String command) {
+        try {
+            server.getCommands().getDispatcher().execute(command, source);
+        } catch (CommandSyntaxException expected) {
+            return;
+        }
+        throw new AssertionError("Expected /" + command + " to fail");
     }
 
     private static ItemStack findItem(ServerPlayer player, net.minecraft.world.item.Item item) {
