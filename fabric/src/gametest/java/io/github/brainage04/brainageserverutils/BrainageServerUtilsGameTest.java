@@ -51,6 +51,11 @@ public final class BrainageServerUtilsGameTest {
     }
 
     @GameTest
+    public void healLeavesDeadPlayersDead(GameTestHelper helper) {
+        ServerUtilsGameTests.runIsolated(helper, ServerUtilsGameTests::healLeavesDeadPlayersDead);
+    }
+
+    @GameTest
     public void flightAndEnchantingAbilitiesFollowMenuAndGameMode(GameTestHelper helper) {
         ServerUtilsGameTests.runIsolated(helper, ServerUtilsGameTests::flightAndEnchantingAbilitiesFollowMenuAndGameMode);
     }
