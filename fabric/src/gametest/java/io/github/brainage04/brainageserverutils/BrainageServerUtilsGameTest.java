@@ -51,6 +51,11 @@ public final class BrainageServerUtilsGameTest {
     }
 
     @GameTest
+    public void commandEdgeCasesKeepTheirPromises(GameTestHelper helper) {
+        ServerUtilsGameTests.runIsolated(helper, ServerUtilsGameTests::commandEdgeCasesKeepTheirPromises);
+    }
+
+    @GameTest
     public void flightAndEnchantingAbilitiesFollowMenuAndGameMode(GameTestHelper helper) {
         ServerUtilsGameTests.runIsolated(helper, ServerUtilsGameTests::flightAndEnchantingAbilitiesFollowMenuAndGameMode);
     }

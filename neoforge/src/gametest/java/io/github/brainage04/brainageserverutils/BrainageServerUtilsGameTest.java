@@ -23,6 +23,7 @@ public final class BrainageServerUtilsGameTest {
             Map.entry("hunger_and_cooldown_rules_affect_players", ServerUtilsGameTests::hungerAndCooldownRulesAffectPlayers),
             Map.entry("enchanting_rules_waive_level_costs_and_cap", ServerUtilsGameTests::enchantingRulesWaiveLevelCostsAndCap),
             Map.entry("player_commands_affect_their_targets", ServerUtilsGameTests::playerCommandsAffectTheirTargets),
+            Map.entry("command_edge_cases_keep_their_promises", ServerUtilsGameTests::commandEdgeCasesKeepTheirPromises),
             Map.entry("flight_and_enchanting_abilities_follow_menu_and_game_mode", ServerUtilsGameTests::flightAndEnchantingAbilitiesFollowMenuAndGameMode),
             Map.entry("rankings_reload_and_reject_invalid_configuration", ServerUtilsGameTests::rankingsReloadAndRejectInvalidConfiguration)
     );
