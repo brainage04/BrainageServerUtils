@@ -41,6 +41,11 @@ public final class BrainageServerUtilsGameTest {
     }
 
     @GameTest
+    public void everyGameRuleHasANameAndDescription(GameTestHelper helper) {
+        ServerUtilsGameTests.runIsolated(helper, ServerUtilsGameTests::everyGameRuleHasANameAndDescription);
+    }
+
+    @GameTest
     public void enchantingRulesWaiveLevelCostsAndCap(GameTestHelper helper) {
         ServerUtilsGameTests.runIsolated(helper, ServerUtilsGameTests::enchantingRulesWaiveLevelCostsAndCap);
     }
