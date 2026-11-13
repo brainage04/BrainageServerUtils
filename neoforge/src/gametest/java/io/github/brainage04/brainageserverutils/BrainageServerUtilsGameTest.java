@@ -18,6 +18,7 @@ public final class BrainageServerUtilsGameTest {
             Map.entry("durability_rule_prevents_item_damage", ServerUtilsGameTests::durabilityRulePreventsItemDamage),
             Map.entry("bucket_rule_preserves_source_without_duplicating_results", ServerUtilsGameTests::bucketRulePreservesSourceWithoutDuplicatingResults),
             Map.entry("preserved_ammunition_cannot_be_picked_up", ServerUtilsGameTests::preservedAmmunitionCannotBePickedUp),
+            Map.entry("preserved_loyalty_trident_is_not_duplicated", ServerUtilsGameTests::preservedLoyaltyTridentIsNotDuplicated),
             Map.entry("scoreboard_tracks_health_deaths_and_player_kills", ServerUtilsGameTests::scoreboardTracksHealthDeathsAndPlayerKills),
             Map.entry("max_enchant_resolves_conflicts_by_preference", ServerUtilsGameTests::maxEnchantResolvesConflictsByPreference),
             Map.entry("hunger_and_cooldown_rules_affect_players", ServerUtilsGameTests::hungerAndCooldownRulesAffectPlayers),
