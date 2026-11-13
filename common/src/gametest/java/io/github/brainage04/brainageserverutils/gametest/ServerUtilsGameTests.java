@@ -1,6 +1,7 @@
 package io.github.brainage04.brainageserverutils.gametest;
 
 import com.mojang.authlib.GameProfile;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import io.github.brainage04.brainagelib.gametest.GameTestPlayer;
 import io.github.brainage04.brainageserverutils.config.EnchantmentRankings;
 import io.github.brainage04.brainageserverutils.enchantment.MaxEnchantment;
@@ -373,8 +374,8 @@ public final class ServerUtilsGameTests {
         helper.succeed();
     }
 
-    /// `/more` with an empty hand must change nothing, and `/maxenchant` without preferences must leave curses out
-    /// (README "Commands").
+    /// `/more` with an empty hand must be refused and change nothing, and `/maxenchant` without preferences must leave
+    /// curses out (README "Commands").
     public static void commandEdgeCasesKeepTheirPromises(GameTestHelper helper) {
         MinecraftServer server = helper.getLevel().getServer();
         ServerPlayer player = survivalPlayer(helper);
@@ -382,7 +383,7 @@ public final class ServerUtilsGameTests {
         try {
             player.getInventory().clearContent();
             player.getInventory().setSelectedSlot(0);
-            run(server, source, "more");
+            runExpectingFailure(server, source, "more");
             assertTrue(player.getInventory().isEmpty(), "Expected /more with an empty hand to give nothing");
 
             player.getInventory().setItem(0, new ItemStack(Items.DIAMOND_SWORD));
@@ -592,6 +593,17 @@ public final class ServerUtilsGameTests {
 
     private static void run(MinecraftServer server, CommandSourceStack source, String command) {
         server.getCommands().performPrefixedCommand(source, command);
+    }
+
+    /// Runs `command` and fails the test unless it is refused. `run` reports a refused command as a chat line, so a
+    /// command that must fail needs its exception back.
+    private static void runExpectingFailure(MinecraftServer server, CommandSourceStack source, String command) {
+        try {
+            server.getCommands().getDispatcher().execute(command, source);
+        } catch (CommandSyntaxException expected) {
+            return;
+        }
+        throw new AssertionError("Expected /" + command + " to fail");
     }
 
     private static ItemStack findItem(ServerPlayer player, net.minecraft.world.item.Item item) {
