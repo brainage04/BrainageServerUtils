@@ -10,8 +10,7 @@ public final class BrainageServerUtils {
     public static final String MOD_NAME = "BrainageServerUtils";
     public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
 
-    private BrainageServerUtils() {
-    }
+    private BrainageServerUtils() {}
 
     public static void initialize(LoaderPlatform platform) {
         LOGGER.info("{} initialising...", MOD_NAME);

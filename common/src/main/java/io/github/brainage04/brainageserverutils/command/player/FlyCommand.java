@@ -16,24 +16,38 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Abilities;
 
 public final class FlyCommand {
-    private static final SimpleCommandExceptionType NO_SURVIVAL_TARGETS = new SimpleCommandExceptionType(
-            Component.literal("Flight can only be toggled for players in survival or adventure mode"));
+    private static final SimpleCommandExceptionType NO_SURVIVAL_TARGETS =
+            new SimpleCommandExceptionType(
+                    Component.literal(
+                            "Flight can only be toggled for players in survival or adventure mode"));
 
-    private FlyCommand() {
-    }
+    private FlyCommand() {}
 
     public static void initialize(CommandDispatcher<CommandSourceStack> dispatcher) {
-        dispatcher.register(PlayerTargets.command("fly", (source, targets) -> execute(source, targets, null))
-                .then(Commands.argument(PlayerTargets.ARGUMENT, EntityArgument.players())
-                        .then(Commands.argument("enabled", BoolArgumentType.bool())
-                                .executes(context -> execute(
-                                        context.getSource(),
-                                        EntityArgument.getPlayers(context, PlayerTargets.ARGUMENT),
-                                        BoolArgumentType.getBool(context, "enabled")
-                                )))));
+        dispatcher.register(
+                PlayerTargets.command("fly", (source, targets) -> execute(source, targets, null))
+                        .then(
+                                Commands.argument(PlayerTargets.ARGUMENT, EntityArgument.players())
+                                        .then(
+                                                Commands.argument(
+                                                                "enabled", BoolArgumentType.bool())
+                                                        .executes(
+                                                                context ->
+                                                                        execute(
+                                                                                context.getSource(),
+                                                                                EntityArgument
+                                                                                        .getPlayers(
+                                                                                                context,
+                                                                                                PlayerTargets
+                                                                                                        .ARGUMENT),
+                                                                                BoolArgumentType
+                                                                                        .getBool(
+                                                                                                context,
+                                                                                                "enabled"))))));
     }
 
-    private static int execute(CommandSourceStack source, Collection<ServerPlayer> targets, Boolean enabled)
+    private static int execute(
+            CommandSourceStack source, Collection<ServerPlayer> targets, Boolean enabled)
             throws CommandSyntaxException {
         List<ServerPlayer> enabledFor = new ArrayList<>();
         List<ServerPlayer> disabledFor = new ArrayList<>();

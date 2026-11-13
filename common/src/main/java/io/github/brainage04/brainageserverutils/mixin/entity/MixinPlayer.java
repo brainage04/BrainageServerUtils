@@ -13,9 +13,10 @@ public abstract class MixinPlayer {
     @ModifyVariable(
             method = "onEnchantmentPerformed(Lnet/minecraft/world/item/ItemStack;I)V",
             at = @At("HEAD"),
-            argsOnly = true
-    )
+            argsOnly = true)
     private int onEnchantmentPerformed$waiveCost(int enchantmentCost) {
-        return RuleChecks.isEnabledFor((Player) (Object) this, ModGameRules.FREE_ENCHANTING) ? 0 : enchantmentCost;
+        return RuleChecks.isEnabledFor((Player) (Object) this, ModGameRules.FREE_ENCHANTING)
+                ? 0
+                : enchantmentCost;
     }
 }

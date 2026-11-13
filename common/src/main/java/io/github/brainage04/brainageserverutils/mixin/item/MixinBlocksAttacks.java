@@ -15,12 +15,18 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(BlocksAttacks.class)
 public abstract class MixinBlocksAttacks {
     @Inject(
-            method = "disable(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/entity/LivingEntity;FLnet/minecraft/world/item/ItemStack;)V",
+            method =
+                    "disable(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/entity/LivingEntity;FLnet/minecraft/world/item/ItemStack;)V",
             at = @At("HEAD"),
-            cancellable = true
-    )
-    private void disable$injected(ServerLevel level, LivingEntity user, float baseSeconds, ItemStack blockingWith, CallbackInfo ci) {
-        if (user instanceof Player player && RuleChecks.isEnabledFor(player, ModGameRules.DISABLE_ITEM_COOLDOWNS)) {
+            cancellable = true)
+    private void disable$injected(
+            ServerLevel level,
+            LivingEntity user,
+            float baseSeconds,
+            ItemStack blockingWith,
+            CallbackInfo ci) {
+        if (user instanceof Player player
+                && RuleChecks.isEnabledFor(player, ModGameRules.DISABLE_ITEM_COOLDOWNS)) {
             ci.cancel();
         }
     }

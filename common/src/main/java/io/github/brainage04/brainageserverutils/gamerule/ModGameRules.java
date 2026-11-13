@@ -19,8 +19,7 @@ public final class ModGameRules {
 
     public static List<GameRule<Boolean>> REGISTERED = List.of();
 
-    private ModGameRules() {
-    }
+    private ModGameRules() {}
 
     public static void initialize(Function<String, GameRule<Boolean>> registrar) {
         DISABLE_DURABILITY = registrar.apply("disable_durability");
@@ -31,15 +30,15 @@ public final class ModGameRules {
         FREE_ENCHANTING = registrar.apply("free_enchanting");
         DISABLE_TOO_EXPENSIVE = registrar.apply("disable_too_expensive");
         DISABLE_ITEM_COOLDOWNS = registrar.apply("disable_item_cooldowns");
-        REGISTERED = List.of(
-                DISABLE_DURABILITY,
-                DISABLE_ITEM_DECREMENT,
-                DISABLE_BUCKET_DECREMENT,
-                INSTANT_CONSUME,
-                DISABLE_HUNGER,
-                FREE_ENCHANTING,
-                DISABLE_TOO_EXPENSIVE,
-                DISABLE_ITEM_COOLDOWNS
-        );
+        REGISTERED =
+                List.of(
+                        DISABLE_DURABILITY,
+                        DISABLE_ITEM_DECREMENT,
+                        DISABLE_BUCKET_DECREMENT,
+                        INSTANT_CONSUME,
+                        DISABLE_HUNGER,
+                        FREE_ENCHANTING,
+                        DISABLE_TOO_EXPENSIVE,
+                        DISABLE_ITEM_COOLDOWNS);
     }
 }

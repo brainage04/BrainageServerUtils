@@ -12,36 +12,34 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 @Mixin(EnchantmentHelper.class)
 public abstract class MixinEnchantmentHelper {
     @Inject(
-            method = "processAmmoUse(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/item/ItemStack;Lnet/minecraft/world/item/ItemStack;I)I",
+            method =
+                    "processAmmoUse(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/item/ItemStack;Lnet/minecraft/world/item/ItemStack;I)I",
             at = @At("HEAD"),
-            cancellable = true
-    )
+            cancellable = true)
     private static void processAmmoUse(
             ServerLevel level,
             ItemStack rangedWeaponStack,
             ItemStack projectileStack,
             int baseAmmoUse,
-            CallbackInfoReturnable<Integer> cir
-    ) {
+            CallbackInfoReturnable<Integer> cir) {
         if (level.getGameRules().get(ModGameRules.DISABLE_ITEM_DECREMENT)) {
             cir.setReturnValue(0);
         }
     }
 
-    /// Every durability loss (`ItemStack.hurtAndBreak` and `hurtWithoutBreaking`) funnels through this helper on
-    /// both loaders. `ItemStack.processDurabilityChange` itself cannot be targeted: NeoForge re-routes it through a
-    /// `LivingEntity` overload that vanilla does not have.
+    /// Every durability loss (`ItemStack.hurtAndBreak` and `hurtWithoutBreaking`) funnels through
+    /// this helper on both loaders. `ItemStack.processDurabilityChange` itself cannot be targeted:
+    /// NeoForge re-routes it through a `LivingEntity` overload that vanilla does not have.
     @Inject(
-            method = "processDurabilityChange(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/item/ItemStack;I)I",
+            method =
+                    "processDurabilityChange(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/item/ItemStack;I)I",
             at = @At("HEAD"),
-            cancellable = true
-    )
+            cancellable = true)
     private static void processDurabilityChange(
             ServerLevel level,
             ItemStack stack,
             int baseDamage,
-            CallbackInfoReturnable<Integer> cir
-    ) {
+            CallbackInfoReturnable<Integer> cir) {
         if (level.getGameRules().get(ModGameRules.DISABLE_DURABILITY)) {
             cir.setReturnValue(0);
         }

@@ -14,8 +14,7 @@ import net.minecraft.world.food.FoodConstants;
 import net.minecraft.world.food.FoodData;
 
 public final class HealCommand {
-    private HealCommand() {
-    }
+    private HealCommand() {}
 
     public static void initialize(CommandDispatcher<CommandSourceStack> dispatcher) {
         dispatcher.register(PlayerTargets.command("heal", HealCommand::execute));
@@ -37,10 +36,11 @@ public final class HealCommand {
         player.clearFire();
         player.setTicksFrozen(0);
         player.setAirSupply(player.getMaxAirSupply());
-        List<Holder<MobEffect>> harmful = player.getActiveEffects().stream()
-                .map(MobEffectInstance::getEffect)
-                .filter(effect -> effect.value().getCategory() == MobEffectCategory.HARMFUL)
-                .toList();
+        List<Holder<MobEffect>> harmful =
+                player.getActiveEffects().stream()
+                        .map(MobEffectInstance::getEffect)
+                        .filter(effect -> effect.value().getCategory() == MobEffectCategory.HARMFUL)
+                        .toList();
         harmful.forEach(player::removeEffect);
     }
 }

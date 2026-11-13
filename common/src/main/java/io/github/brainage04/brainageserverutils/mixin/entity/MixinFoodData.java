@@ -13,11 +13,9 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(FoodData.class)
 public abstract class MixinFoodData {
-    @Shadow
-    private int foodLevel;
+    @Shadow private int foodLevel;
 
-    @Shadow
-    private float exhaustionLevel;
+    @Shadow private float exhaustionLevel;
 
     @Inject(method = "tick(Lnet/minecraft/server/level/ServerPlayer;)V", at = @At("HEAD"))
     private void tick$injected(ServerPlayer player, CallbackInfo ci) {

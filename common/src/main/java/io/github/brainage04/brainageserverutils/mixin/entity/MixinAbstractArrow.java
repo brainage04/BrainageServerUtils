@@ -13,8 +13,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(AbstractArrow.class)
 public abstract class MixinAbstractArrow {
-    @Shadow
-    public AbstractArrow.Pickup pickup;
+    @Shadow public AbstractArrow.Pickup pickup;
 
     @Inject(method = "setOwner(Lnet/minecraft/world/entity/Entity;)V", at = @At("TAIL"))
     private void onSetOwner(Entity entity, CallbackInfo ci) {

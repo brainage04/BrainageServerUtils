@@ -16,14 +16,14 @@ public final class MoreCommand {
     private static final SimpleCommandExceptionType NOTHING_HELD =
             new SimpleCommandExceptionType(Component.literal("No target is holding an item"));
 
-    private MoreCommand() {
-    }
+    private MoreCommand() {}
 
     public static void initialize(CommandDispatcher<CommandSourceStack> dispatcher) {
         dispatcher.register(PlayerTargets.command("more", MoreCommand::execute));
     }
 
-    private static int execute(CommandSourceStack source, Collection<ServerPlayer> targets) throws CommandSyntaxException {
+    private static int execute(CommandSourceStack source, Collection<ServerPlayer> targets)
+            throws CommandSyntaxException {
         List<ServerPlayer> filled = new ArrayList<>();
         for (ServerPlayer player : targets) {
             ItemStack stack = player.getMainHandItem();

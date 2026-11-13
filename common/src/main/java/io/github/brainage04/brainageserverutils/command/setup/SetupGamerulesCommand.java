@@ -15,7 +15,11 @@ import net.minecraft.world.level.gamerules.GameRules;
 /// Both presets set every rule they touch, so switching between them is lossless.
 public final class SetupGamerulesCommand {
     private static final List<GameRule<Boolean>> ENVIRONMENTAL_DAMAGE =
-            List.of(GameRules.FALL_DAMAGE, GameRules.FIRE_DAMAGE, GameRules.DROWNING_DAMAGE, GameRules.FREEZE_DAMAGE);
+            List.of(
+                    GameRules.FALL_DAMAGE,
+                    GameRules.FIRE_DAMAGE,
+                    GameRules.DROWNING_DAMAGE,
+                    GameRules.FREEZE_DAMAGE);
 
     private enum Preset {
         SURVIVAL(false),
@@ -32,14 +36,16 @@ public final class SetupGamerulesCommand {
         }
     }
 
-    private SetupGamerulesCommand() {
-    }
+    private SetupGamerulesCommand() {}
 
     public static void initialize(CommandDispatcher<CommandSourceStack> dispatcher) {
-        LiteralArgumentBuilder<CommandSourceStack> root = Commands.literal("setupgamerules")
-                .requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS));
+        LiteralArgumentBuilder<CommandSourceStack> root =
+                Commands.literal("setupgamerules")
+                        .requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS));
         for (Preset preset : Preset.values()) {
-            root.then(Commands.literal(preset.commandName()).executes(context -> execute(context.getSource(), preset)));
+            root.then(
+                    Commands.literal(preset.commandName())
+                            .executes(context -> execute(context.getSource(), preset)));
         }
         dispatcher.register(root);
     }
@@ -59,7 +65,9 @@ public final class SetupGamerulesCommand {
         for (GameRule<Boolean> rule : ModGameRules.REGISTERED) {
             rules.set(rule, preset.sandbox, server);
         }
-        source.sendSuccess(() -> Component.literal("Applied the " + preset.commandName() + " gamerule preset"), true);
+        source.sendSuccess(
+                () -> Component.literal("Applied the " + preset.commandName() + " gamerule preset"),
+                true);
         return 1;
     }
 }
