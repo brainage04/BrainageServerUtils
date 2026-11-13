@@ -12,7 +12,7 @@
   "gamerule.brainageserverutils.free_enchanting": "Free Enchanting",
   "gamerule.brainageserverutils.free_enchanting.description": "Enchanting tables and anvils cost no levels and need none. Lapis and anvil materials are still used.",
   "gamerule.brainageserverutils.disable_too_expensive": "Disable Too Expensive",
-  "gamerule.brainageserverutils.disable_too_expensive.description": "Anvil costs of 40 levels or more are capped at 39 instead of being refused as Too Expensive.",
+  "gamerule.brainageserverutils.disable_too_expensive.description": "Anvil costs of 40 levels or more are capped at 39 instead of being refused as Too Expensive. Stacked items are still refused.",
   "gamerule.brainageserverutils.disable_item_cooldowns": "Disable Item Cooldowns",
   "gamerule.brainageserverutils.disable_item_cooldowns.description": "Removes item cooldowns such as ender pearls and wind charges, and axes no longer disable shields."
 }
