@@ -40,6 +40,7 @@ import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.monster.zombie.Zombie;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.projectile.arrow.Arrow;
+import net.minecraft.world.entity.projectile.arrow.ThrownTrident;
 import net.minecraft.world.inventory.AnvilMenu;
 import net.minecraft.world.inventory.EnchantmentMenu;
 import net.minecraft.world.item.ItemStack;
@@ -240,6 +241,38 @@ public final class ServerUtilsGameTests {
                                 arrow -> arrow.getOwner() == player && !arrow.isRemoved());
         assertEquals(1, arrows.size(), "Expected one fired arrow");
         return arrows.getFirst();
+    }
+
+    /// A returning Loyalty trident is handed back by `ThrownTrident.tryPickup` even when its pickup is DISALLOWED
+    /// (26.3:172). With `disable_item_decrement` the throw keeps the trident in hand, so the returned one would be a
+    /// second trident.
+    public static void preservedLoyaltyTridentIsNotDuplicated(GameTestHelper helper) {
+        ServerPlayer player = survivalPlayer(helper);
+        try {
+            player.getInventory().clearContent();
+            ItemStack trident = new ItemStack(Items.TRIDENT);
+            trident.enchant(enchantment(helper, Enchantments.LOYALTY), 3);
+            player.setItemSlot(EquipmentSlot.MAINHAND, trident);
+            setRule(helper, ModGameRules.DISABLE_ITEM_DECREMENT, true);
+            ItemStack held = player.getMainHandItem();
+            assertTrue(held.getItem().releaseUsing(held, helper.getLevel(), player, held.getUseDuration(player) - 20),
+                    "Expected a fully charged trident to be thrown");
+            List<ThrownTrident> thrown = helper.getLevel().getEntitiesOfClass(ThrownTrident.class,
+                    player.getBoundingBox().inflate(4), entity -> entity.getOwner() == player && !entity.isRemoved());
+            assertEquals(1, thrown.size(), "Expected one thrown trident");
+            assertEquals(1, player.getInventory().countItem(Items.TRIDENT), "Expected the throw not to consume the trident");
+            ThrownTrident returning = thrown.getFirst();
+            returning.setNoPhysics(true);
+            returning.playerTouch(player);
+            assertTrue(returning.isRemoved(), "Expected the returning trident to vanish on reaching its owner");
+            assertEquals(1, player.getInventory().countItem(Items.TRIDENT), "Expected no second trident from the return");
+        } finally {
+            helper.getLevel().getEntitiesOfClass(ThrownTrident.class, player.getBoundingBox().inflate(4),
+                    entity -> entity.getOwner() == player).forEach(ThrownTrident::discard);
+            resetRules(helper);
+            removePlayer(player);
+        }
+        helper.succeed();
     }
 
     public static void scoreboardTracksHealthDeathsAndPlayerKills(GameTestHelper helper) {

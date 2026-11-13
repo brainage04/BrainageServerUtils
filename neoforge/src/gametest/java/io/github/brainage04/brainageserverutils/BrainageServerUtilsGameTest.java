@@ -29,6 +29,9 @@ public final class BrainageServerUtilsGameTest {
                             "preserved_ammunition_cannot_be_picked_up",
                             ServerUtilsGameTests::preservedAmmunitionCannotBePickedUp),
                     Map.entry(
+                            "preserved_loyalty_trident_is_not_duplicated",
+                            ServerUtilsGameTests::preservedLoyaltyTridentIsNotDuplicated),
+                    Map.entry(
                             "scoreboard_tracks_health_deaths_and_player_kills",
                             ServerUtilsGameTests::scoreboardTracksHealthDeathsAndPlayerKills),
                     Map.entry(
