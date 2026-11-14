@@ -27,14 +27,18 @@ public final class HealCommand {
         dispatcher.register(PlayerTargets.command("heal", HealCommand::execute));
     }
 
-    /// A dead player is skipped: the server ignores the respawn request of a player whose health is above zero
-    /// (`ServerGamePacketListenerImpl.handleClientCommand`, 26.3:1959), so healing one on the death screen would
-    /// leave them there until they reconnect.
-    private static int execute(CommandSourceStack source, Collection<ServerPlayer> targets) throws CommandSyntaxException {
+    /// A dead player is skipped: the server ignores the respawn request of a player whose health is
+    /// above zero (`ServerGamePacketListenerImpl.handleClientCommand`, 26.3:1959), so healing one
+    /// on the death screen would leave them there until they reconnect.
+    private static int execute(CommandSourceStack source, Collection<ServerPlayer> targets)
+            throws CommandSyntaxException {
         List<ServerPlayer> healed = new ArrayList<>();
         for (ServerPlayer player : targets) {
             if (player.isDeadOrDying()) {
-                source.sendFailure(Component.empty().append(player.getDisplayName()).append(" is dead and cannot be healed"));
+                source.sendFailure(
+                        Component.empty()
+                                .append(player.getDisplayName())
+                                .append(" is dead and cannot be healed"));
                 continue;
             }
             heal(player);
