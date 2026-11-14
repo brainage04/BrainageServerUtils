@@ -21,7 +21,6 @@ import net.minecraft.core.Holder;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.ComponentUtils;
 import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerPlayer;
@@ -157,11 +156,14 @@ public final class MaxEnchantCommand {
                 "commands.brainageserverutils.maxenchant.success",
                 stack.getDisplayName(),
                 player.getDisplayName(),
-                ComponentUtils.formatList(
-                        result.applied(),
-                        (Holder.Reference<Enchantment> enchantment) ->
-                                Enchantment.getFullname(
-                                        enchantment, enchantment.value().getMaxLevel())));
+                Translations.joined(
+                        result.applied().stream()
+                                .map(
+                                        enchantment ->
+                                                Enchantment.getFullname(
+                                                        enchantment,
+                                                        enchantment.value().getMaxLevel()))
+                                .toList()));
     }
 
     private static Component describeUndecided(MaxEnchantment.Conflict conflict) {

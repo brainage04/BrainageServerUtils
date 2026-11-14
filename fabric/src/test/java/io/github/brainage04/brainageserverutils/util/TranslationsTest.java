@@ -20,6 +20,7 @@ import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
+import net.minecraft.network.chat.Component;
 import org.junit.jupiter.api.Test;
 
 class TranslationsTest {
@@ -34,7 +35,8 @@ class TranslationsTest {
     private static final Pattern KEY_LITERAL =
             Pattern.compile("\"([a-z_]+\\.brainageserverutils\\.[a-z0-9_.]+)\"");
     private static final Pattern HARD_CODED_TEXT =
-            Pattern.compile("Component\\.literal\\(|\\.append\\(\\s*\"");
+            Pattern.compile(
+                    "Component\\.(literal|translatable|nullToEmpty)\\(|\\.append\\(\\s*\"");
 
     @Test
     void everyKeyTheCodeUsesHasEnglishText() throws IOException {
@@ -71,6 +73,17 @@ class TranslationsTest {
         assertEquals(
                 "Healed 3 players",
                 Translations.englishText("commands.brainageserverutils.heal.success.multiple", 3));
+    }
+
+    @Test
+    void joinedNamesKeepTheMessageStyle() {
+        Component joined =
+                Translations.joined(
+                        List.of(Component.literal("Sharpness V"), Component.literal("Looting III")));
+        assertEquals("Sharpness V, Looting III", joined.getString());
+        for (Component part : joined.toFlatList()) {
+            assertTrue(part.getStyle().isEmpty(), "Expected no style on " + part.getString());
+        }
     }
 
     @Test

@@ -8,9 +8,11 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
+import java.util.Collection;
 import java.util.Locale;
 import java.util.Map;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.ComponentUtils;
 import net.minecraft.network.chat.MutableComponent;
 
 /// Clients do not need this mod, so an unmodified client has none of its keys. Every message
@@ -25,6 +27,12 @@ public final class Translations {
 
     public static MutableComponent text(String key, Object... args) {
         return Component.translatableWithFallback(key, english(key), args);
+    }
+
+    /// Unlike `ComponentUtils.formatList`'s default gray separator (`ComponentUtils.java:19`), the
+    /// commas take the style of the message they are part of.
+    public static Component joined(Collection<? extends Component> parts) {
+        return ComponentUtils.formatList(parts, ComponentUtils.DEFAULT_NO_STYLE_SEPARATOR);
     }
 
     /// The English text with the arguments filled in, for messages that are logged as well as
