@@ -12,4 +12,4 @@ Configure these repository settings before publishing:
 
 A missing token skips only that destination; the GitHub Release still proceeds.
 
-`.modrinth/project.json` holds the Modrinth categories that the publishing tasks read. The NeoForge version declares no extra dependencies, so there is no `.modrinth/neoforge-dependencies.json`.
+`.modrinth/project.json` holds the Modrinth categories that the publishing tasks read. When `.modrinth/neoforge-dependencies.json` exists, the uploads read their declared dependencies from it; the 26.3 line has one, which declares BrainageLib.
