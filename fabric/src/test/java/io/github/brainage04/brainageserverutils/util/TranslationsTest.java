@@ -35,8 +35,7 @@ class TranslationsTest {
     private static final Pattern KEY_LITERAL =
             Pattern.compile("\"([a-z_]+\\.brainageserverutils\\.[a-z0-9_.]+)\"");
     private static final Pattern HARD_CODED_TEXT =
-            Pattern.compile(
-                    "Component\\.(literal|translatable|nullToEmpty)\\(|\\.append\\(\\s*\"");
+            Pattern.compile("Component\\.(literal|translatable|nullToEmpty)\\(|\\.append\\(\\s*\"");
 
     @Test
     void everyKeyTheCodeUsesHasEnglishText() throws IOException {
@@ -79,7 +78,9 @@ class TranslationsTest {
     void joinedNamesKeepTheMessageStyle() {
         Component joined =
                 Translations.joined(
-                        List.of(Component.literal("Sharpness V"), Component.literal("Looting III")));
+                        List.of(
+                                Component.literal("Sharpness V"),
+                                Component.literal("Looting III")));
         assertEquals("Sharpness V, Looting III", joined.getString());
         for (Component part : joined.toFlatList()) {
             assertTrue(part.getStyle().isEmpty(), "Expected no style on " + part.getString());
