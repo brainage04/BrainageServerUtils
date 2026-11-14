@@ -16,4 +16,4 @@ GameTests cover the previous version's file format, the exact bytes of the recre
 
 ## Messages
 
-Command replies and scoreboard names are translation keys in `common/src/main/resources/assets/brainageserverutils/lang/en_us.json`, sent through `Translations.text`. Clients do not need the mod, so each message also carries its English text from that file as the fallback an unmodified client shows. `TranslationsTest` (Fabric unit tests) fails when the code uses a key the file lacks, when the file has a key no code uses, or when a reply is built from a hard-coded string.
+Command replies and scoreboard names are translation keys in `common/src/main/resources/assets/brainageserverutils/lang/en_us.json`, sent through `Translations.text`. Clients do not need the mod, so each message also carries its English text from that file as the fallback an unmodified client shows. `TranslationsTest` (Fabric unit tests) fails when the code uses a key the file lacks, when the file has a key no code uses, or when a reply is built from a hard-coded string or sends a key without its English fallback (`Component.translatable`, `Component.nullToEmpty`).
