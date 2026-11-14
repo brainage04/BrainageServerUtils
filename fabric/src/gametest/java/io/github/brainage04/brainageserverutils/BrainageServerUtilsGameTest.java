@@ -30,6 +30,12 @@ public final class BrainageServerUtilsGameTest {
     }
 
     @GameTest
+    public void preservedLoyaltyTridentIsNotDuplicated(GameTestHelper helper) {
+        ServerUtilsGameTests.runIsolated(
+                helper, ServerUtilsGameTests::preservedLoyaltyTridentIsNotDuplicated);
+    }
+
+    @GameTest
     public void scoreboardTracksHealthDeathsAndPlayerKills(GameTestHelper helper) {
         ServerUtilsGameTests.runIsolated(
                 helper, ServerUtilsGameTests::scoreboardTracksHealthDeathsAndPlayerKills);
