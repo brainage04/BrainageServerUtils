@@ -44,6 +44,9 @@ public final class BrainageServerUtilsGameTest {
                             "player_commands_affect_their_targets",
                             ServerUtilsGameTests::playerCommandsAffectTheirTargets),
                     Map.entry(
+                            "heal_leaves_dead_players_dead",
+                            ServerUtilsGameTests::healLeavesDeadPlayersDead),
+                    Map.entry(
                             "flight_and_enchanting_abilities_follow_menu_and_game_mode",
                             ServerUtilsGameTests
                                     ::flightAndEnchantingAbilitiesFollowMenuAndGameMode),
