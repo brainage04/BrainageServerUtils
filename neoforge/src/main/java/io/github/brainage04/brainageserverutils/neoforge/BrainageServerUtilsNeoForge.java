@@ -18,7 +18,7 @@ import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.loading.FMLPaths;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.RegisterCommandsEvent;
-import net.neoforged.neoforge.event.server.ServerStartingEvent;
+import net.neoforged.neoforge.event.server.ServerAboutToStartEvent;
 import net.neoforged.neoforge.event.server.ServerStoppedEvent;
 import net.neoforged.neoforge.registries.DeferredRegister;
 
@@ -67,10 +67,16 @@ public final class BrainageServerUtilsNeoForge implements LoaderPlatform {
                         ModCommands.initialize(event.getDispatcher(), event.getBuildContext()));
     }
 
+    /// Fabric's SERVER_STARTING fires before `initServer()` (fabric-lifecycle-events-v1 4.1.9
+    /// `MinecraftServerMixin.beforeSetupServer`), so before the levels load. NeoForge 26.3.0.99's
+    /// ServerStartingEvent fires after `loadLevel()`; ServerAboutToStartEvent fires just before it
+    /// (`DedicatedServer.java.patch:23`, `GameTestServer.java.patch:28`,
+    /// `IntegratedServer.java.patch:7`), which is the moment that matches.
     @Override
     public void registerServerLifecycle() {
         NeoForge.EVENT_BUS.addListener(
-                (ServerStartingEvent event) -> CurrentServer.onServerStarting(event.getServer()));
+                (ServerAboutToStartEvent event) ->
+                        CurrentServer.onServerStarting(event.getServer()));
         NeoForge.EVENT_BUS.addListener(
                 (ServerStoppedEvent event) -> CurrentServer.onServerStopped(event.getServer()));
     }

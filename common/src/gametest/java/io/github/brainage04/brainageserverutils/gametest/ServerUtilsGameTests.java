@@ -1106,8 +1106,12 @@ public final class ServerUtilsGameTests {
                 StartPhaseProbe.knownWhileStarting() != null,
                 "Expected the server-starting probe to have run");
         assertTrue(
+                !StartPhaseProbe.levelsLoaded(),
+                "Expected the probe to run before the levels load, where Fabric's SERVER_STARTING"
+                        + " fires");
+        assertTrue(
                 StartPhaseProbe.knownWhileStarting(),
-                "Expected the mod to know the server from the server-starting phase on");
+                "Expected the mod to know the server before the levels load");
         assertTrue(
                 CurrentServer.get() == helper.getLevel().getServer(),
                 "Expected the mod to know the running server");

@@ -10,7 +10,7 @@ import net.minecraft.resources.Identifier;
 import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.event.server.ServerStartingEvent;
+import net.neoforged.neoforge.event.server.ServerAboutToStartEvent;
 import net.neoforged.neoforge.registries.RegisterEvent;
 
 /// Each function has a matching `data/brainageserverutils/test_instance/<name>.json`.
@@ -69,7 +69,7 @@ public final class BrainageServerUtilsGameTest {
     private BrainageServerUtilsGameTest() {}
 
     @SubscribeEvent(priority = EventPriority.LOWEST)
-    public static void probeServerStarting(ServerStartingEvent event) {
+    public static void probeServerAboutToStart(ServerAboutToStartEvent event) {
         StartPhaseProbe.serverStarting(event.getServer());
     }
 
