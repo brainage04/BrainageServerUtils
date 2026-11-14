@@ -32,6 +32,7 @@ import net.minecraft.server.ServerScoreboard;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.permissions.PermissionSet;
+import net.minecraft.tags.EnchantmentTags;
 import net.minecraft.world.SimpleMenuProvider;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
@@ -51,6 +52,7 @@ import net.minecraft.world.item.component.Consumable;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.Enchantments;
+import net.minecraft.world.item.enchantment.ItemEnchantments;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.gamerules.GameRule;
 import net.minecraft.world.level.gamerules.GameRules;
@@ -413,6 +415,34 @@ public final class ServerUtilsGameTests {
             assertEquals(45, player.experienceLevel, "Expected free_enchanting to keep levels at the anvil");
         } finally {
             resetRules(helper);
+            removePlayer(player);
+        }
+        helper.succeed();
+    }
+
+    /// `/more` with an empty hand must be refused and change nothing, and `/maxenchant` without preferences must leave
+    /// curses out (README "Commands").
+    public static void commandEdgeCasesKeepTheirPromises(GameTestHelper helper) {
+        MinecraftServer server = helper.getLevel().getServer();
+        ServerPlayer player = survivalPlayer(helper);
+        CommandSourceStack source = server.createCommandSourceStack().withEntity(player).withSuppressedOutput();
+        try {
+            player.getInventory().clearContent();
+            player.getInventory().setSelectedSlot(0);
+            runExpectingFailure(server, source, "more");
+            assertTrue(player.getInventory().isEmpty(), "Expected /more with an empty hand to give nothing");
+
+            player.getInventory().setItem(0, new ItemStack(Items.DIAMOND_SWORD));
+            run(server, source, "maxenchant");
+            ItemEnchantments applied = player.getMainHandItem().getOrDefault(DataComponents.ENCHANTMENTS, ItemEnchantments.EMPTY);
+            assertTrue(!applied.isEmpty(), "Expected /maxenchant to enchant the held sword");
+            for (Holder<Enchantment> enchantment : applied.keySet()) {
+                assertTrue(!enchantment.is(EnchantmentTags.CURSE), "Expected no curse without a preference, found " + enchantment);
+                assertEquals(enchantment.value().getMaxLevel(), applied.getLevel(enchantment),
+                        "Expected " + enchantment + " at its maximum level");
+            }
+            assertEquals(3, applied.getLevel(enchantment(helper, Enchantments.UNBREAKING)), "Expected Unbreaking III");
+        } finally {
             removePlayer(player);
         }
         helper.succeed();
