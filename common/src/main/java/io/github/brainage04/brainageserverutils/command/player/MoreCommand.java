@@ -4,17 +4,18 @@ import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import io.github.brainage04.brainageserverutils.command.core.PlayerTargets;
+import io.github.brainage04.brainageserverutils.util.Translations;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import net.minecraft.commands.CommandSourceStack;
-import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
 
 public final class MoreCommand {
     private static final SimpleCommandExceptionType NOTHING_HELD =
-            new SimpleCommandExceptionType(Component.literal("No target is holding an item"));
+            new SimpleCommandExceptionType(
+                    Translations.text("commands.brainageserverutils.more.failed"));
 
     private MoreCommand() {}
 
@@ -35,7 +36,11 @@ public final class MoreCommand {
         if (filled.isEmpty()) {
             throw NOTHING_HELD.create();
         }
-        PlayerTargets.sendSuccess(source, "Filled the held stack of", filled);
+        PlayerTargets.sendSuccess(
+                source,
+                "commands.brainageserverutils.more.success.single",
+                "commands.brainageserverutils.more.success.multiple",
+                filled);
         return filled.size();
     }
 }

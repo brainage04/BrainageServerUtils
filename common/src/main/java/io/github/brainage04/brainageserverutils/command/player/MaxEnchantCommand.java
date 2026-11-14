@@ -8,6 +8,7 @@ import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import io.github.brainage04.brainageserverutils.command.core.PlayerTargets;
 import io.github.brainage04.brainageserverutils.config.EnchantmentRankings;
 import io.github.brainage04.brainageserverutils.enchantment.MaxEnchantment;
+import io.github.brainage04.brainageserverutils.util.Translations;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -20,7 +21,7 @@ import net.minecraft.core.Holder;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.ComponentUtils;
 import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerPlayer;
@@ -30,7 +31,8 @@ import net.minecraft.world.item.enchantment.Enchantment;
 public final class MaxEnchantCommand {
     private static final int MAX_PREFERENCES = 8;
     private static final SimpleCommandExceptionType NOTHING_ENCHANTED =
-            new SimpleCommandExceptionType(Component.literal("No held item could be enchanted"));
+            new SimpleCommandExceptionType(
+                    Translations.text("commands.brainageserverutils.maxenchant.failed"));
 
     private MaxEnchantCommand() {}
 
@@ -91,25 +93,25 @@ public final class MaxEnchantCommand {
             ItemStack stack = player.getMainHandItem();
             if (stack.isEmpty()) {
                 source.sendFailure(
-                        Component.empty()
-                                .append(player.getDisplayName())
-                                .append(" is not holding an item"));
+                        Translations.text(
+                                "commands.brainageserverutils.maxenchant.not_holding",
+                                player.getDisplayName()));
                 continue;
             }
             MaxEnchantment.Result result =
                     MaxEnchantment.apply(stack, enchantments, rankings, preferred);
             for (Holder.Reference<Enchantment> inapplicable : result.inapplicable()) {
                 source.sendFailure(
-                        Component.empty()
-                                .append(inapplicable.value().description())
-                                .append(" cannot be applied to ")
-                                .append(stack.getDisplayName()));
+                        Translations.text(
+                                "commands.brainageserverutils.maxenchant.inapplicable",
+                                inapplicable.value().description(),
+                                stack.getDisplayName()));
             }
             if (result.applied().isEmpty()) {
                 source.sendFailure(
-                        Component.empty()
-                                .append(stack.getDisplayName())
-                                .append(" cannot be enchanted"));
+                        Translations.text(
+                                "commands.brainageserverutils.maxenchant.cannot_enchant",
+                                stack.getDisplayName()));
                 continue;
             }
             enchanted++;
@@ -132,17 +134,16 @@ public final class MaxEnchantCommand {
         try {
             rankings = EnchantmentRankings.load();
         } catch (EnchantmentRankings.InvalidConfigException exception) {
-            throw new SimpleCommandExceptionType(Component.literal(exception.getMessage()))
-                    .create();
+            throw new SimpleCommandExceptionType(exception.problem()).create();
         }
         for (List<Identifier> ranking : rankings) {
             for (Identifier id : ranking) {
                 if (enchantments.get(ResourceKey.create(Registries.ENCHANTMENT, id)).isEmpty()) {
                     throw new SimpleCommandExceptionType(
-                                    Component.literal(
-                                            EnchantmentRankings.FILE_NAME
-                                                    + " lists unknown enchantment "
-                                                    + id))
+                                    Translations.text(
+                                            "commands.brainageserverutils.rankings.unknown_enchantment",
+                                            EnchantmentRankings.FILE_NAME,
+                                            id.toString()))
                             .create();
                 }
             }
@@ -152,33 +153,23 @@ public final class MaxEnchantCommand {
 
     private static Component describeApplied(
             ServerPlayer player, ItemStack stack, MaxEnchantment.Result result) {
-        MutableComponent message =
-                Component.literal("Enchanted ")
-                        .append(stack.getDisplayName())
-                        .append(" held by ")
-                        .append(player.getDisplayName())
-                        .append(": ");
-        for (int index = 0; index < result.applied().size(); index++) {
-            Holder.Reference<Enchantment> enchantment = result.applied().get(index);
-            if (index > 0) {
-                message.append(", ");
-            }
-            message.append(Enchantment.getFullname(enchantment, enchantment.value().getMaxLevel()));
-        }
-        return message;
+        return Translations.text(
+                "commands.brainageserverutils.maxenchant.success",
+                stack.getDisplayName(),
+                player.getDisplayName(),
+                ComponentUtils.formatList(
+                        result.applied(),
+                        (Holder.Reference<Enchantment> enchantment) ->
+                                Enchantment.getFullname(
+                                        enchantment, enchantment.value().getMaxLevel())));
     }
 
     private static Component describeUndecided(MaxEnchantment.Conflict conflict) {
-        return Component.literal("No ranking decides between ")
-                .append(conflict.chosen().value().description())
-                .append(" and ")
-                .append(conflict.skipped().value().description())
-                .append("; kept ")
-                .append(conflict.chosen().value().description())
-                .append(
-                        ". To prefer the other, pass "
-                                + conflict.skipped().key().identifier()
-                                + " after the targets or add a ranking to config/"
-                                + EnchantmentRankings.FILE_NAME);
+        return Translations.text(
+                "commands.brainageserverutils.maxenchant.undecided",
+                conflict.chosen().value().description(),
+                conflict.skipped().value().description(),
+                conflict.skipped().key().identifier().toString(),
+                EnchantmentRankings.FILE_NAME);
     }
 }

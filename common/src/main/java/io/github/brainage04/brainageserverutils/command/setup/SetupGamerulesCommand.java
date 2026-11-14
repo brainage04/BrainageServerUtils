@@ -3,11 +3,11 @@ package io.github.brainage04.brainageserverutils.command.setup;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import io.github.brainage04.brainageserverutils.gamerule.ModGameRules;
+import io.github.brainage04.brainageserverutils.util.Translations;
 import java.util.List;
 import java.util.Locale;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
-import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.level.gamerules.GameRule;
 import net.minecraft.world.level.gamerules.GameRules;
@@ -66,7 +66,10 @@ public final class SetupGamerulesCommand {
             rules.set(rule, preset.sandbox, server);
         }
         source.sendSuccess(
-                () -> Component.literal("Applied the " + preset.commandName() + " gamerule preset"),
+                () ->
+                        Translations.text(
+                                "commands.brainageserverutils.setupgamerules.success",
+                                preset.commandName()),
                 true);
         return 1;
     }

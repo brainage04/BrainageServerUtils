@@ -5,21 +5,20 @@ import com.mojang.brigadier.arguments.BoolArgumentType;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import io.github.brainage04.brainageserverutils.command.core.PlayerTargets;
+import io.github.brainage04.brainageserverutils.util.Translations;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.EntityArgument;
-import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Abilities;
 
 public final class FlyCommand {
     private static final SimpleCommandExceptionType NO_SURVIVAL_TARGETS =
             new SimpleCommandExceptionType(
-                    Component.literal(
-                            "Flight can only be toggled for players in survival or adventure mode"));
+                    Translations.text("commands.brainageserverutils.fly.failed"));
 
     private FlyCommand() {}
 
@@ -68,10 +67,18 @@ public final class FlyCommand {
             throw NO_SURVIVAL_TARGETS.create();
         }
         if (!enabledFor.isEmpty()) {
-            PlayerTargets.sendSuccess(source, "Enabled flight for", enabledFor);
+            PlayerTargets.sendSuccess(
+                    source,
+                    "commands.brainageserverutils.fly.enabled.single",
+                    "commands.brainageserverutils.fly.enabled.multiple",
+                    enabledFor);
         }
         if (!disabledFor.isEmpty()) {
-            PlayerTargets.sendSuccess(source, "Disabled flight for", disabledFor);
+            PlayerTargets.sendSuccess(
+                    source,
+                    "commands.brainageserverutils.fly.disabled.single",
+                    "commands.brainageserverutils.fly.disabled.multiple",
+                    disabledFor);
         }
         return enabledFor.size() + disabledFor.size();
     }

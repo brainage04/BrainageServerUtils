@@ -93,7 +93,12 @@ public final class KitCommand {
                 player.getInventory().placeItemBackInInventory(stack, Prediction.SERVER_ONLY);
             }
         }
-        PlayerTargets.sendSuccess(source, "Gave the " + kit.commandName() + " kit to", targets);
+        PlayerTargets.sendSuccess(
+                source,
+                "commands.brainageserverutils.kit.success.single",
+                "commands.brainageserverutils.kit.success.multiple",
+                targets,
+                kit.commandName());
         return targets.size();
     }
 

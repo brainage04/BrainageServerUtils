@@ -3,12 +3,13 @@ package io.github.brainage04.brainageserverutils.command.core;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import io.github.brainage04.brainageserverutils.util.Translations;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.EntityArgument;
-import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 
 public final class PlayerTargets {
@@ -41,15 +42,21 @@ public final class PlayerTargets {
         return List.of(context.getSource().getPlayerOrException());
     }
 
+    /// Reports the affected players: `singleKey` takes the player's name and `multipleKey` the
+    /// number of players, each after `args`.
     public static void sendSuccess(
-            CommandSourceStack source, String verb, Collection<ServerPlayer> affected) {
+            CommandSourceStack source,
+            String singleKey,
+            String multipleKey,
+            Collection<ServerPlayer> affected,
+            Object... args) {
+        Object[] withTarget = Arrays.copyOf(args, args.length + 1);
         if (affected.size() == 1) {
-            ServerPlayer player = affected.iterator().next();
-            source.sendSuccess(
-                    () -> Component.literal(verb + " ").append(player.getDisplayName()), true);
+            withTarget[args.length] = affected.iterator().next().getDisplayName();
+            source.sendSuccess(() -> Translations.text(singleKey, withTarget), true);
         } else {
-            source.sendSuccess(
-                    () -> Component.literal(verb + " " + affected.size() + " players"), true);
+            withTarget[args.length] = affected.size();
+            source.sendSuccess(() -> Translations.text(multipleKey, withTarget), true);
         }
     }
 }

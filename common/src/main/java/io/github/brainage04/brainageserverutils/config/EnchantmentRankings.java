@@ -9,11 +9,13 @@ import com.google.gson.JsonParseException;
 import com.google.gson.JsonSyntaxException;
 import io.github.brainage04.brainagelib.storage.JsonFile;
 import io.github.brainage04.brainageserverutils.BrainageServerUtils;
+import io.github.brainage04.brainageserverutils.util.Translations;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 
 /// The file is read on every use, so edits apply without a restart. Saving goes through
@@ -82,10 +84,12 @@ public final class EnchantmentRankings {
                 yield defaults();
             }
             case JsonFile.LoadResult.Invalid<Document> invalid ->
-                    throw new InvalidConfigException(problem(invalid.exception()));
+                    throw problem(invalid.exception());
             case JsonFile.LoadResult.IoError<Document> ioError ->
                     throw new InvalidConfigException(
-                            "could not be read: " + ioError.exception().getMessage());
+                            "commands.brainageserverutils.rankings.unreadable",
+                            FILE_NAME,
+                            String.valueOf(ioError.exception().getMessage()));
         };
     }
 
@@ -94,15 +98,16 @@ public final class EnchantmentRankings {
     private static Document decode(JsonElement document) {
         if (!(document instanceof JsonObject object)
                 || !(object.get(RANKINGS_KEY) instanceof JsonArray rankingsJson)) {
-            throw new JsonParseException(
-                    "must be an object with an \"" + RANKINGS_KEY + "\" array");
+            throw new RankingsProblem(
+                    "commands.brainageserverutils.rankings.not_an_object", FILE_NAME, RANKINGS_KEY);
         }
 
         List<List<String>> rankings = new ArrayList<>();
         Set<Identifier> seen = new HashSet<>();
         for (JsonElement rankingJson : rankingsJson) {
             if (!(rankingJson instanceof JsonArray entries)) {
-                throw new JsonParseException("each ranking must be an array of enchantment IDs");
+                throw new RankingsProblem(
+                        "commands.brainageserverutils.rankings.ranking_not_an_array", FILE_NAME);
             }
             List<String> ranking = new ArrayList<>();
             for (JsonElement entry : entries) {
@@ -112,10 +117,16 @@ public final class EnchantmentRankings {
                                 : null;
                 Identifier id = value == null ? null : Identifier.tryParse(value);
                 if (id == null) {
-                    throw new JsonParseException("contains an invalid enchantment ID: " + entry);
+                    throw new RankingsProblem(
+                            "commands.brainageserverutils.rankings.invalid_id",
+                            FILE_NAME,
+                            entry.toString());
                 }
                 if (!seen.add(id)) {
-                    throw new JsonParseException("lists " + id + " in more than one place");
+                    throw new RankingsProblem(
+                            "commands.brainageserverutils.rankings.duplicate",
+                            FILE_NAME,
+                            id.toString());
                 }
                 ranking.add(value);
             }
@@ -130,21 +141,47 @@ public final class EnchantmentRankings {
                 .toList();
     }
 
-    private static String problem(JsonParseException exception) {
-        // Gson's syntax errors are the unreadable-file case; the decoder's own messages are
-        // configuration problems.
-        return exception instanceof JsonSyntaxException
-                ? "could not be read: " + exception.getMessage()
-                : exception.getMessage();
+    private static InvalidConfigException problem(JsonParseException exception) {
+        return switch (exception) {
+            case RankingsProblem problem -> new InvalidConfigException(problem.key, problem.args);
+            case JsonSyntaxException syntax ->
+                    new InvalidConfigException(
+                            "commands.brainageserverutils.rankings.unreadable",
+                            FILE_NAME,
+                            String.valueOf(syntax.getMessage()));
+            default ->
+                    new InvalidConfigException(
+                            "commands.brainageserverutils.rankings.invalid",
+                            FILE_NAME,
+                            String.valueOf(exception.getMessage()));
+        };
     }
 
     /// The stored document; the component name is the JSON field, so the file's format is
     /// unchanged.
     private record Document(List<List<String>> enchantment_rankings) {}
 
+    private static final class RankingsProblem extends JsonParseException {
+        private final String key;
+        private final String[] args;
+
+        RankingsProblem(String key, String... args) {
+            super(Translations.englishText(key, (Object[]) args));
+            this.key = key;
+            this.args = args;
+        }
+    }
+
     public static final class InvalidConfigException extends Exception {
-        public InvalidConfigException(String problem) {
-            super(FILE_NAME + " " + problem);
+        private final transient Component problem;
+
+        InvalidConfigException(String key, String... args) {
+            super(Translations.englishText(key, (Object[]) args));
+            this.problem = Translations.text(key, (Object[]) args);
+        }
+
+        public Component problem() {
+            return problem;
         }
     }
 }

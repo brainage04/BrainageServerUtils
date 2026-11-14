@@ -24,7 +24,11 @@ public final class HealCommand {
         for (ServerPlayer player : targets) {
             heal(player);
         }
-        PlayerTargets.sendSuccess(source, "Healed", targets);
+        PlayerTargets.sendSuccess(
+                source,
+                "commands.brainageserverutils.heal.success.single",
+                "commands.brainageserverutils.heal.success.multiple",
+                targets);
         return targets.size();
     }
 
