@@ -5,6 +5,7 @@ import io.github.brainage04.brainagelib.gametest.GameTestPlayer;
 import io.github.brainage04.brainageserverutils.config.EnchantmentRankings;
 import io.github.brainage04.brainageserverutils.enchantment.MaxEnchantment;
 import io.github.brainage04.brainageserverutils.gamerule.ModGameRules;
+import io.github.brainage04.brainageserverutils.util.CurrentServer;
 import io.github.brainage04.brainageserverutils.util.ShownAbilities;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -1098,6 +1099,19 @@ public final class ServerUtilsGameTests {
         }
         MinecraftServer server = helper.getLevel().getServer();
         server.getGameRules().set(GameRules.FALL_DAMAGE, true, server);
+    }
+
+    public static void serverIsKnownWhileStarting(GameTestHelper helper) {
+        assertTrue(
+                StartPhaseProbe.knownWhileStarting() != null,
+                "Expected the server-starting probe to have run");
+        assertTrue(
+                StartPhaseProbe.knownWhileStarting(),
+                "Expected the mod to know the server from the server-starting phase on");
+        assertTrue(
+                CurrentServer.get() == helper.getLevel().getServer(),
+                "Expected the mod to know the running server");
+        helper.succeed();
     }
 
     private static void assertTrue(boolean condition, String message) {

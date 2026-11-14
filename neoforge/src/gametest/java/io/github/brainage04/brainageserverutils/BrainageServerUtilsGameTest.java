@@ -1,13 +1,16 @@
 package io.github.brainage04.brainageserverutils;
 
 import io.github.brainage04.brainageserverutils.gametest.ServerUtilsGameTests;
+import io.github.brainage04.brainageserverutils.gametest.StartPhaseProbe;
 import java.util.Map;
 import java.util.function.Consumer;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.resources.Identifier;
+import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.neoforge.event.server.ServerStartingEvent;
 import net.neoforged.neoforge.registries.RegisterEvent;
 
 /// Each function has a matching `data/brainageserverutils/test_instance/<name>.json`.
@@ -58,9 +61,17 @@ public final class BrainageServerUtilsGameTest {
                             ServerUtilsGameTests::defaultRankingsKeepPreviousFormat),
                     Map.entry(
                             "unreadable_rankings_are_not_overwritten",
-                            ServerUtilsGameTests::unreadableRankingsAreNotOverwritten));
+                            ServerUtilsGameTests::unreadableRankingsAreNotOverwritten),
+                    Map.entry(
+                            "server_is_known_while_starting",
+                            ServerUtilsGameTests::serverIsKnownWhileStarting));
 
     private BrainageServerUtilsGameTest() {}
+
+    @SubscribeEvent(priority = EventPriority.LOWEST)
+    public static void probeServerStarting(ServerStartingEvent event) {
+        StartPhaseProbe.serverStarting(event.getServer());
+    }
 
     @SubscribeEvent
     public static void registerTestFunctions(RegisterEvent event) {

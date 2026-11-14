@@ -6,6 +6,9 @@
   "icon": "assets/brainageserverutils/icon.png",
   "environment": "*",
   "entrypoints": {
+    "main": [
+      "io.github.brainage04.brainageserverutils.StartPhaseProbeFabric"
+    ],
     "fabric-gametest": [
       "io.github.brainage04.brainageserverutils.BrainageServerUtilsGameTest"
     ],

@@ -88,4 +88,9 @@ public final class BrainageServerUtilsGameTest {
         ServerUtilsGameTests.runIsolated(
                 helper, ServerUtilsGameTests::unreadableRankingsAreNotOverwritten);
     }
+
+    @GameTest
+    public void serverIsKnownWhileStarting(GameTestHelper helper) {
+        ServerUtilsGameTests.runIsolated(helper, ServerUtilsGameTests::serverIsKnownWhileStarting);
+    }
 }

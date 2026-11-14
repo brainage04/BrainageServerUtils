@@ -18,7 +18,7 @@ import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.loading.FMLPaths;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.RegisterCommandsEvent;
-import net.neoforged.neoforge.event.server.ServerStartedEvent;
+import net.neoforged.neoforge.event.server.ServerStartingEvent;
 import net.neoforged.neoforge.event.server.ServerStoppedEvent;
 import net.neoforged.neoforge.registries.DeferredRegister;
 
@@ -70,7 +70,7 @@ public final class BrainageServerUtilsNeoForge implements LoaderPlatform {
     @Override
     public void registerServerLifecycle() {
         NeoForge.EVENT_BUS.addListener(
-                (ServerStartedEvent event) -> CurrentServer.onServerStarting(event.getServer()));
+                (ServerStartingEvent event) -> CurrentServer.onServerStarting(event.getServer()));
         NeoForge.EVENT_BUS.addListener(
                 (ServerStoppedEvent event) -> CurrentServer.onServerStopped(event.getServer()));
     }
