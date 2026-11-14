@@ -14,6 +14,8 @@
   "commands.brainageserverutils.fly.failed": "Flight can only be toggled for players in survival or adventure mode",
   "commands.brainageserverutils.heal.success.single": "Healed %s",
   "commands.brainageserverutils.heal.success.multiple": "Healed %s players",
+  "commands.brainageserverutils.heal.dead": "%s is dead and cannot be healed",
+  "commands.brainageserverutils.heal.failed": "Only living players can be healed",
   "commands.brainageserverutils.kit.success.single": "Gave the %s kit to %s",
   "commands.brainageserverutils.kit.success.multiple": "Gave the %s kit to %s players",
   "commands.brainageserverutils.maxenchant.success": "Enchanted %s held by %s: %s",
