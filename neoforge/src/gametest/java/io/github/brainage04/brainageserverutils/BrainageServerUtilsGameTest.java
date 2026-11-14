@@ -22,6 +22,7 @@ public final class BrainageServerUtilsGameTest {
             Map.entry("scoreboard_tracks_health_deaths_and_player_kills", ServerUtilsGameTests::scoreboardTracksHealthDeathsAndPlayerKills),
             Map.entry("max_enchant_resolves_conflicts_by_preference", ServerUtilsGameTests::maxEnchantResolvesConflictsByPreference),
             Map.entry("hunger_and_cooldown_rules_affect_players", ServerUtilsGameTests::hungerAndCooldownRulesAffectPlayers),
+            Map.entry("every_game_rule_has_a_name_and_description", ServerUtilsGameTests::everyGameRuleHasANameAndDescription),
             Map.entry("enchanting_rules_waive_level_costs_and_cap", ServerUtilsGameTests::enchantingRulesWaiveLevelCostsAndCap),
             Map.entry("player_commands_affect_their_targets", ServerUtilsGameTests::playerCommandsAffectTheirTargets),
             Map.entry("heal_leaves_dead_players_dead", ServerUtilsGameTests::healLeavesDeadPlayersDead),

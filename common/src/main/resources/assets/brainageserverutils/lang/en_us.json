@@ -1,10 +1,18 @@
 {
   "gamerule.brainageserverutils.disable_durability": "Disable Durability",
+  "gamerule.brainageserverutils.disable_durability.description": "Items take no durability damage.",
   "gamerule.brainageserverutils.disable_item_decrement": "Disable Item Decrement",
+  "gamerule.brainageserverutils.disable_item_decrement.description": "Using an item or firing ammunition does not use it up. Fired arrows cannot be picked up, so they are not duplicated.",
   "gamerule.brainageserverutils.disable_bucket_decrement": "Disable Bucket Decrement",
+  "gamerule.brainageserverutils.disable_bucket_decrement.description": "Filling a bucket, bottle or other container keeps the empty one as well.",
   "gamerule.brainageserverutils.instant_consume": "Instant Consumption",
+  "gamerule.brainageserverutils.instant_consume.description": "Food, drinks and other consumables are used in one tick.",
   "gamerule.brainageserverutils.disable_hunger": "Disable Hunger",
+  "gamerule.brainageserverutils.disable_hunger.description": "Hunger stays full and saturation does not drain.",
   "gamerule.brainageserverutils.free_enchanting": "Free Enchanting",
+  "gamerule.brainageserverutils.free_enchanting.description": "Enchanting tables and anvils cost no levels and need none. Lapis and anvil materials are still used.",
   "gamerule.brainageserverutils.disable_too_expensive": "Disable Too Expensive",
-  "gamerule.brainageserverutils.disable_item_cooldowns": "Disable Item Cooldowns"
+  "gamerule.brainageserverutils.disable_too_expensive.description": "Anvil costs of 40 levels or more are capped at 39 instead of being refused as Too Expensive. Stacked items are still refused.",
+  "gamerule.brainageserverutils.disable_item_cooldowns": "Disable Item Cooldowns",
+  "gamerule.brainageserverutils.disable_item_cooldowns.description": "Removes item cooldowns such as ender pearls and wind charges, and axes no longer disable shields."
 }

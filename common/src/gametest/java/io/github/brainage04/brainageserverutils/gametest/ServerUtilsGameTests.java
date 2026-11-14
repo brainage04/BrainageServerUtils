@@ -22,6 +22,7 @@ import net.minecraft.core.HolderLookup;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.gametest.framework.GameTestHelper;
+import net.minecraft.locale.Language;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.ClientboundPlayerAbilitiesPacket;
 import net.minecraft.resources.Identifier;
@@ -316,6 +317,18 @@ public final class ServerUtilsGameTests {
         ItemStack apple = new ItemStack(Items.APPLE);
         MaxEnchantment.Result nothing = MaxEnchantment.apply(apple, enchantments, rankings, List.of());
         assertTrue(nothing.applied().isEmpty() && apple.getEnchantments().isEmpty(), "Expected apples to stay unenchanted");
+        helper.succeed();
+    }
+
+    /// The edit-game-rules screen shows `gamerule.<id>` as the name and `gamerule.<id>.description` as the tooltip
+    /// (`AbstractGameRulesScreen`, 26.2:294-295).
+    public static void everyGameRuleHasANameAndDescription(GameTestHelper helper) {
+        Language language = Language.getInstance();
+        for (GameRule<Boolean> rule : ModGameRules.REGISTERED) {
+            String key = rule.getDescriptionId();
+            assertTrue(language.has(key), "Expected an English name for " + key);
+            assertTrue(language.has(key + ".description"), "Expected an English description for " + key);
+        }
         helper.succeed();
     }
 
