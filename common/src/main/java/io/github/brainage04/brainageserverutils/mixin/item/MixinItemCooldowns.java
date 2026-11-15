@@ -14,9 +14,12 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(ItemCooldowns.class)
 public abstract class MixinItemCooldowns {
-    /// Clients start ender pearl, wind charge and similar cooldowns themselves when using the item, so a zero-length
-    /// cooldown is sent back to clear that prediction.
-    @Inject(method = "addCooldown(Lnet/minecraft/resources/Identifier;I)V", at = @At("HEAD"), cancellable = true)
+    /// Clients start ender pearl, wind charge and similar cooldowns themselves when using the item,
+    /// so a zero-length cooldown is sent back to clear that prediction.
+    @Inject(
+            method = "addCooldown(Lnet/minecraft/resources/Identifier;I)V",
+            at = @At("HEAD"),
+            cancellable = true)
     private void addCooldown$injected(Identifier cooldownGroup, int time, CallbackInfo ci) {
         if (!((Object) this instanceof ServerItemCooldowns)) {
             return;

@@ -9,15 +9,16 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
 
-/// Every abilities packet, whoever sends it (`/fly`, game mode changes, respawns), passes through here, so a
-/// `free_enchanting` display override survives ability changes made while a menu is open.
+/// Every abilities packet, whoever sends it (`/fly`, game mode changes, respawns), passes through
+/// here, so a `free_enchanting` display override survives ability changes made while a menu is
+/// open.
 @Mixin(ServerCommonPacketListenerImpl.class)
 public abstract class MixinServerCommonPacketListenerImpl {
     @ModifyVariable(
-            method = "send(Lnet/minecraft/network/protocol/Packet;Lio/netty/channel/ChannelFutureListener;)V",
+            method =
+                    "send(Lnet/minecraft/network/protocol/Packet;Lio/netty/channel/ChannelFutureListener;)V",
             at = @At("HEAD"),
-            argsOnly = true
-    )
+            argsOnly = true)
     private Packet<?> send$showAbilities(Packet<?> packet) {
         if (packet instanceof ClientboundPlayerAbilitiesPacket abilities
                 && (Object) this instanceof ServerGamePacketListenerImpl game) {

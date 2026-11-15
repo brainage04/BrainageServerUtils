@@ -27,15 +27,20 @@ public final class BrainageServerUtilsFabric implements ModInitializer, LoaderPl
 
     @Override
     public void registerGameRules() {
-        ModGameRules.initialize(name -> GameRuleBuilder.forBoolean(false)
-                .category(GameRuleCategory.PLAYER)
-                .buildAndRegister(Identifier.fromNamespaceAndPath(BrainageServerUtils.MOD_ID, name)));
+        ModGameRules.initialize(
+                name ->
+                        GameRuleBuilder.forBoolean(false)
+                                .category(GameRuleCategory.PLAYER)
+                                .buildAndRegister(
+                                        Identifier.fromNamespaceAndPath(
+                                                BrainageServerUtils.MOD_ID, name)));
     }
 
     @Override
     public void registerCommands() {
-        CommandRegistrationCallback.EVENT.register((dispatcher, buildContext, environment) ->
-                ModCommands.initialize(dispatcher, buildContext));
+        CommandRegistrationCallback.EVENT.register(
+                (dispatcher, buildContext, environment) ->
+                        ModCommands.initialize(dispatcher, buildContext));
     }
 
     @Override

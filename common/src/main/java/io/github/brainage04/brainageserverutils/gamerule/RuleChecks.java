@@ -5,8 +5,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.gamerules.GameRule;
 
 public final class RuleChecks {
-    private RuleChecks() {
-    }
+    private RuleChecks() {}
 
     public static boolean isEnabledFor(Entity entity, GameRule<Boolean> rule) {
         return entity.level() instanceof ServerLevel level && level.getGameRules().get(rule);
