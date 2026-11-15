@@ -685,8 +685,7 @@ public final class ServerUtilsGameTests {
                     mayFly(player) && shownAbilities(player).canInstabuild(),
                     "Expected /fly to leave creative abilities alone");
             player.setGameMode(GameType.SURVIVAL);
-            assertTrue(
-                    !mayFly(player), "Expected a game-mode change to reset flight");
+            assertTrue(!mayFly(player), "Expected a game-mode change to reset flight");
             var denied =
                     server.getCommands()
                             .getDispatcher()
