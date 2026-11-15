@@ -12,9 +12,9 @@ jobs:
   distribution:
     permissions:
       contents: write
-    uses: brainage04/MinecraftModConventions/.github/workflows/reusable-multiloader-release.yml@v3.0.1
+    uses: brainage04/MinecraftModConventions/.github/workflows/reusable-multiloader-release.yml@v3.5.0
     with:
-      prepare_siblings: BrainageLib
+      prepare_siblings: BrainageLib@50946bb5623306b79cfd61b389eec6736057783b
       additional_artifact_pattern: brainageserverutils-neoforge-*.jar
       modrinth_project_id: ${{ vars.MODRINTH_PROJECT_ID }}
       curseforge_project_id: ${{ vars.CURSEFORGE_PROJECT_ID }}

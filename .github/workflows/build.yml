@@ -17,18 +17,18 @@ permissions:
 
 jobs:
   build:
-    uses: brainage04/MinecraftModConventions/.github/workflows/reusable-mod-build.yml@v3.0.1
+    uses: brainage04/MinecraftModConventions/.github/workflows/reusable-mod-build.yml@v3.5.0
     with:
-      prepare_siblings: BrainageLib
+      prepare_siblings: BrainageLib@50946bb5623306b79cfd61b389eec6736057783b
 
   client-gametests:
     if: ${{ vars.RUN_CLIENT_GAMETESTS != 'false' && (github.event_name != 'workflow_dispatch' || inputs.run_client_gametests) }}
-    uses: brainage04/MinecraftModConventions/.github/workflows/reusable-client-gametests.yml@v3.0.1
+    uses: brainage04/MinecraftModConventions/.github/workflows/reusable-client-gametests.yml@v3.5.0
     with:
-      prepare_siblings: BrainageLib
+      prepare_siblings: BrainageLib@50946bb5623306b79cfd61b389eec6736057783b
       run_client_gametests: ${{ github.event_name != 'workflow_dispatch' || inputs.run_client_gametests }}
 
   production-gametests:
-    uses: brainage04/MinecraftModConventions/.github/workflows/reusable-production-gametests.yml@v3.0.1
+    uses: brainage04/MinecraftModConventions/.github/workflows/reusable-production-gametests.yml@v3.5.0
     with:
-      prepare_siblings: BrainageLib
+      prepare_siblings: BrainageLib@50946bb5623306b79cfd61b389eec6736057783b
