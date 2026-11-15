@@ -23,23 +23,31 @@ import net.minecraft.resources.Identifier;
 public final class EnchantmentRankings {
     public static final String FILE_NAME = "brainageserverutils.json";
     private static final String RANKINGS_KEY = "enchantment_rankings";
-    private static final Gson GSON = new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create();
-    private static final List<List<String>> DEFAULT_RANKINGS = List.of(
-            List.of("minecraft:sharpness", "minecraft:density", "minecraft:breach", "minecraft:smite",
-                    "minecraft:bane_of_arthropods", "minecraft:impaling"),
-            List.of("minecraft:protection", "minecraft:blast_protection", "minecraft:fire_protection",
-                    "minecraft:projectile_protection"),
-            List.of("minecraft:infinity", "minecraft:mending"),
-            List.of("minecraft:fortune", "minecraft:silk_touch"),
-            List.of("minecraft:multishot", "minecraft:piercing"),
-            List.of("minecraft:depth_strider", "minecraft:frost_walker"),
-            List.of("minecraft:loyalty", "minecraft:channeling", "minecraft:riptide")
-    );
+    private static final Gson GSON =
+            new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create();
+    private static final List<List<String>> DEFAULT_RANKINGS =
+            List.of(
+                    List.of(
+                            "minecraft:sharpness",
+                            "minecraft:density",
+                            "minecraft:breach",
+                            "minecraft:smite",
+                            "minecraft:bane_of_arthropods",
+                            "minecraft:impaling"),
+                    List.of(
+                            "minecraft:protection",
+                            "minecraft:blast_protection",
+                            "minecraft:fire_protection",
+                            "minecraft:projectile_protection"),
+                    List.of("minecraft:infinity", "minecraft:mending"),
+                    List.of("minecraft:fortune", "minecraft:silk_touch"),
+                    List.of("minecraft:multishot", "minecraft:piercing"),
+                    List.of("minecraft:depth_strider", "minecraft:frost_walker"),
+                    List.of("minecraft:loyalty", "minecraft:channeling", "minecraft:riptide"));
 
     private static Path path;
 
-    private EnchantmentRankings() {
-    }
+    private EnchantmentRankings() {}
 
     public static void initialize(Path configDirectory) {
         path = configDirectory.resolve(FILE_NAME);
@@ -73,24 +81,30 @@ public final class EnchantmentRankings {
         return parse(document);
     }
 
-    private static List<List<Identifier>> parse(JsonElement document) throws InvalidConfigException {
-        if (!(document instanceof JsonObject object) || !(object.get(RANKINGS_KEY) instanceof JsonArray rankingsJson)) {
-            throw new InvalidConfigException("must be an object with an \"" + RANKINGS_KEY + "\" array");
+    private static List<List<Identifier>> parse(JsonElement document)
+            throws InvalidConfigException {
+        if (!(document instanceof JsonObject object)
+                || !(object.get(RANKINGS_KEY) instanceof JsonArray rankingsJson)) {
+            throw new InvalidConfigException(
+                    "must be an object with an \"" + RANKINGS_KEY + "\" array");
         }
 
         List<List<Identifier>> rankings = new ArrayList<>();
         Set<Identifier> seen = new HashSet<>();
         for (JsonElement rankingJson : rankingsJson) {
             if (!(rankingJson instanceof JsonArray entries)) {
-                throw new InvalidConfigException("each ranking must be an array of enchantment IDs");
+                throw new InvalidConfigException(
+                        "each ranking must be an array of enchantment IDs");
             }
             List<Identifier> ranking = new ArrayList<>();
             for (JsonElement entry : entries) {
-                Identifier id = entry.isJsonPrimitive() && entry.getAsJsonPrimitive().isString()
-                        ? Identifier.tryParse(entry.getAsString())
-                        : null;
+                Identifier id =
+                        entry.isJsonPrimitive() && entry.getAsJsonPrimitive().isString()
+                                ? Identifier.tryParse(entry.getAsString())
+                                : null;
                 if (id == null) {
-                    throw new InvalidConfigException("contains an invalid enchantment ID: " + entry);
+                    throw new InvalidConfigException(
+                            "contains an invalid enchantment ID: " + entry);
                 }
                 if (!seen.add(id)) {
                     throw new InvalidConfigException("lists " + id + " in more than one place");
@@ -111,7 +125,8 @@ public final class EnchantmentRankings {
                 GSON.toJson(document, writer);
             }
         } catch (IOException exception) {
-            BrainageServerUtils.LOGGER.error("Failed to write default enchantment rankings to {}", path, exception);
+            BrainageServerUtils.LOGGER.error(
+                    "Failed to write default enchantment rankings to {}", path, exception);
         }
     }
 

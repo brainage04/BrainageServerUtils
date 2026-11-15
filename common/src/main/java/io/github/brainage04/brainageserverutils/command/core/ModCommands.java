@@ -12,10 +12,10 @@ import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.CommandSourceStack;
 
 public final class ModCommands {
-    private ModCommands() {
-    }
+    private ModCommands() {}
 
-    public static void initialize(CommandDispatcher<CommandSourceStack> dispatcher, CommandBuildContext buildContext) {
+    public static void initialize(
+            CommandDispatcher<CommandSourceStack> dispatcher, CommandBuildContext buildContext) {
         FlyCommand.initialize(dispatcher);
         HealCommand.initialize(dispatcher);
         KitCommand.initialize(dispatcher);

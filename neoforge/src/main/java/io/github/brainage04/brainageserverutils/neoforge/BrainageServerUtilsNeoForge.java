@@ -24,7 +24,8 @@ import net.neoforged.neoforge.registries.DeferredRegister;
 
 @Mod(BrainageServerUtils.MOD_ID)
 public final class BrainageServerUtilsNeoForge implements LoaderPlatform {
-    private final DeferredRegister<GameRule<?>> gameRules = DeferredRegister.create(Registries.GAME_RULE, BrainageServerUtils.MOD_ID);
+    private final DeferredRegister<GameRule<?>> gameRules =
+            DeferredRegister.create(Registries.GAME_RULE, BrainageServerUtils.MOD_ID);
     private final IEventBus modBus;
 
     public BrainageServerUtilsNeoForge(IEventBus modBus) {
@@ -37,29 +38,40 @@ public final class BrainageServerUtilsNeoForge implements LoaderPlatform {
         return FMLPaths.CONFIGDIR.get();
     }
 
-    /// Rules are created up front so common code can hold them directly; the registry receives them later.
+    /// Rules are created up front so common code can hold them directly; the registry receives them
+    /// later.
     @Override
     public void registerGameRules() {
-        ModGameRules.initialize(name -> {
-            GameRule<Boolean> rule = new GameRule<>(
-                    GameRuleCategory.PLAYER, GameRuleType.BOOL, BoolArgumentType.bool(),
-                    (visitor, gameRule) -> visitor.visitBoolean(gameRule), Codec.BOOL, value -> value ? 1 : 0, false, FeatureFlagSet.of()
-            );
-            gameRules.register(name, () -> rule);
-            return rule;
-        });
+        ModGameRules.initialize(
+                name -> {
+                    GameRule<Boolean> rule =
+                            new GameRule<>(
+                                    GameRuleCategory.PLAYER,
+                                    GameRuleType.BOOL,
+                                    BoolArgumentType.bool(),
+                                    (visitor, gameRule) -> visitor.visitBoolean(gameRule),
+                                    Codec.BOOL,
+                                    value -> value ? 1 : 0,
+                                    false,
+                                    FeatureFlagSet.of());
+                    gameRules.register(name, () -> rule);
+                    return rule;
+                });
         gameRules.register(modBus);
     }
 
     @Override
     public void registerCommands() {
-        NeoForge.EVENT_BUS.addListener((RegisterCommandsEvent event) ->
-                ModCommands.initialize(event.getDispatcher(), event.getBuildContext()));
+        NeoForge.EVENT_BUS.addListener(
+                (RegisterCommandsEvent event) ->
+                        ModCommands.initialize(event.getDispatcher(), event.getBuildContext()));
     }
 
     @Override
     public void registerServerLifecycle() {
-        NeoForge.EVENT_BUS.addListener((ServerStartedEvent event) -> CurrentServer.onServerStarting(event.getServer()));
-        NeoForge.EVENT_BUS.addListener((ServerStoppedEvent event) -> CurrentServer.onServerStopped(event.getServer()));
+        NeoForge.EVENT_BUS.addListener(
+                (ServerStartedEvent event) -> CurrentServer.onServerStarting(event.getServer()));
+        NeoForge.EVENT_BUS.addListener(
+                (ServerStoppedEvent event) -> CurrentServer.onServerStopped(event.getServer()));
     }
 }

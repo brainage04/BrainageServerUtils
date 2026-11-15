@@ -21,21 +21,24 @@ public final class HealCommand {
     private static final SimpleCommandExceptionType NO_LIVING_TARGETS =
             new SimpleCommandExceptionType(Component.literal("Only living players can be healed"));
 
-    private HealCommand() {
-    }
+    private HealCommand() {}
 
     public static void initialize(CommandDispatcher<CommandSourceStack> dispatcher) {
         dispatcher.register(PlayerTargets.command("heal", HealCommand::execute));
     }
 
-    /// A dead player is skipped: the server ignores the respawn request of a player whose health is above zero
-    /// (`ServerGamePacketListenerImpl.handleClientCommand`, 26.2:1889), so healing one on the death screen would
-    /// leave them there until they reconnect.
-    private static int execute(CommandSourceStack source, Collection<ServerPlayer> targets) throws CommandSyntaxException {
+    /// A dead player is skipped: the server ignores the respawn request of a player whose health is
+    /// above zero (`ServerGamePacketListenerImpl.handleClientCommand`, 26.2:1889), so healing one
+    /// on the death screen would leave them there until they reconnect.
+    private static int execute(CommandSourceStack source, Collection<ServerPlayer> targets)
+            throws CommandSyntaxException {
         List<ServerPlayer> healed = new ArrayList<>();
         for (ServerPlayer player : targets) {
             if (player.isDeadOrDying()) {
-                source.sendFailure(Component.empty().append(player.getDisplayName()).append(" is dead and cannot be healed"));
+                source.sendFailure(
+                        Component.empty()
+                                .append(player.getDisplayName())
+                                .append(" is dead and cannot be healed"));
                 continue;
             }
             heal(player);
@@ -56,10 +59,11 @@ public final class HealCommand {
         player.clearFire();
         player.setTicksFrozen(0);
         player.setAirSupply(player.getMaxAirSupply());
-        List<Holder<MobEffect>> harmful = player.getActiveEffects().stream()
-                .map(MobEffectInstance::getEffect)
-                .filter(effect -> effect.value().getCategory() == MobEffectCategory.HARMFUL)
-                .toList();
+        List<Holder<MobEffect>> harmful =
+                player.getActiveEffects().stream()
+                        .map(MobEffectInstance::getEffect)
+                        .filter(effect -> effect.value().getCategory() == MobEffectCategory.HARMFUL)
+                        .toList();
         harmful.forEach(player::removeEffect);
     }
 }

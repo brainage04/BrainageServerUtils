@@ -14,32 +14,42 @@ import net.minecraft.server.level.ServerPlayer;
 public final class PlayerTargets {
     public static final String ARGUMENT = "targets";
 
-    private PlayerTargets() {
-    }
+    private PlayerTargets() {}
 
     @FunctionalInterface
     public interface Action {
-        int run(CommandSourceStack source, Collection<ServerPlayer> targets) throws CommandSyntaxException;
+        int run(CommandSourceStack source, Collection<ServerPlayer> targets)
+                throws CommandSyntaxException;
     }
 
     public static LiteralArgumentBuilder<CommandSourceStack> command(String name, Action action) {
         return Commands.literal(name)
                 .requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS))
                 .executes(context -> action.run(context.getSource(), self(context)))
-                .then(Commands.argument(ARGUMENT, EntityArgument.players())
-                        .executes(context -> action.run(context.getSource(), EntityArgument.getPlayers(context, ARGUMENT))));
+                .then(
+                        Commands.argument(ARGUMENT, EntityArgument.players())
+                                .executes(
+                                        context ->
+                                                action.run(
+                                                        context.getSource(),
+                                                        EntityArgument.getPlayers(
+                                                                context, ARGUMENT))));
     }
 
-    public static Collection<ServerPlayer> self(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
+    public static Collection<ServerPlayer> self(CommandContext<CommandSourceStack> context)
+            throws CommandSyntaxException {
         return List.of(context.getSource().getPlayerOrException());
     }
 
-    public static void sendSuccess(CommandSourceStack source, String verb, Collection<ServerPlayer> affected) {
+    public static void sendSuccess(
+            CommandSourceStack source, String verb, Collection<ServerPlayer> affected) {
         if (affected.size() == 1) {
             ServerPlayer player = affected.iterator().next();
-            source.sendSuccess(() -> Component.literal(verb + " ").append(player.getDisplayName()), true);
+            source.sendSuccess(
+                    () -> Component.literal(verb + " ").append(player.getDisplayName()), true);
         } else {
-            source.sendSuccess(() -> Component.literal(verb + " " + affected.size() + " players"), true);
+            source.sendSuccess(
+                    () -> Component.literal(verb + " " + affected.size() + " players"), true);
         }
     }
 }
