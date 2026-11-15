@@ -46,8 +46,8 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.item.component.BlocksAttacks;
 import net.minecraft.world.item.component.Consumable;
 import net.minecraft.world.item.enchantment.Enchantment;
-import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.Enchantments;
+import net.minecraft.world.item.enchantment.ItemEnchantments;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.gamerules.GameRule;
 import net.minecraft.world.level.gamerules.GameRules;
@@ -389,7 +389,7 @@ public final class ServerUtilsGameTests {
         MaxEnchantment.Result nothing =
                 MaxEnchantment.apply(apple, enchantments, rankings, List.of());
         assertTrue(
-                nothing.applied().isEmpty() && apple.getEnchantments().isEmpty(),
+                nothing.applied().isEmpty() && !apple.isEnchanted(),
                 "Expected apples to stay unenchanted");
         helper.succeed();
     }
@@ -649,7 +649,7 @@ public final class ServerUtilsGameTests {
                 server.createCommandSourceStack().withEntity(player).withSuppressedOutput();
         try {
             run(server, source, "fly");
-            assertTrue(player.getAbilities().mayfly, "Expected /fly to toggle survival flight on");
+            assertTrue(mayFly(player), "Expected /fly to toggle survival flight on");
             player.getAbilities().flying = true;
             setRule(helper, ModGameRules.FREE_ENCHANTING, true);
             player.openMenu(
@@ -674,19 +674,19 @@ public final class ServerUtilsGameTests {
                     "Expected closing the menu to restore normal abilities");
             run(server, source, "fly @s false");
             assertTrue(
-                    !player.getAbilities().mayfly && !player.getAbilities().flying,
+                    !mayFly(player) && !player.getAbilities().flying,
                     "Expected flight revocation to stop flight");
             player.setGameMode(GameType.ADVENTURE);
             run(server, source, "fly @s true");
-            assertTrue(player.getAbilities().mayfly, "Expected adventure flight");
+            assertTrue(mayFly(player), "Expected adventure flight");
             player.setGameMode(GameType.CREATIVE);
             run(server, source, "fly @s false");
             assertTrue(
-                    player.getAbilities().mayfly && shownAbilities(player).canInstabuild(),
+                    mayFly(player) && shownAbilities(player).canInstabuild(),
                     "Expected /fly to leave creative abilities alone");
             player.setGameMode(GameType.SURVIVAL);
             assertTrue(
-                    !player.getAbilities().mayfly, "Expected a game-mode change to reset flight");
+                    !mayFly(player), "Expected a game-mode change to reset flight");
             var denied =
                     server.getCommands()
                             .getDispatcher()
@@ -699,6 +699,10 @@ public final class ServerUtilsGameTests {
             removePlayer(player);
         }
         helper.succeed();
+    }
+
+    private static boolean mayFly(ServerPlayer player) {
+        return player.getAbilities().pack().mayFly();
     }
 
     private static ClientboundPlayerAbilitiesPacket shownAbilities(ServerPlayer player) {
@@ -748,7 +752,7 @@ public final class ServerUtilsGameTests {
                                 .withSuppressedOutput(),
                         "maxenchant");
                 assertTrue(
-                        player.getMainHandItem().getEnchantments().isEmpty(),
+                        !player.getMainHandItem().isEnchanted(),
                         "Expected unknown IDs not to change the held item");
             } finally {
                 removePlayer(player);
@@ -835,7 +839,8 @@ public final class ServerUtilsGameTests {
     }
 
     private static int level(GameTestHelper helper, ResourceKey<Enchantment> key, ItemStack stack) {
-        return EnchantmentHelper.getItemEnchantmentLevel(enchantment(helper, key), stack);
+        return stack.getOrDefault(DataComponents.ENCHANTMENTS, ItemEnchantments.EMPTY)
+                .getLevel(enchantment(helper, key));
     }
 
     private static void setRule(GameTestHelper helper, GameRule<Boolean> rule, boolean value) {
