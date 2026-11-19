@@ -15,7 +15,6 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Abilities;
 
-/// Grants or revokes survival/adventure flight. Vanilla resets it whenever a player's game mode changes.
 public final class FlyCommand {
     private static final SimpleCommandExceptionType NO_SURVIVAL_TARGETS = new SimpleCommandExceptionType(
             Component.literal("Flight can only be toggled for players in survival or adventure mode"));
@@ -34,7 +33,6 @@ public final class FlyCommand {
                                 )))));
     }
 
-    /// `enabled == null` toggles each target individually.
     private static int execute(CommandSourceStack source, Collection<ServerPlayer> targets, Boolean enabled)
             throws CommandSyntaxException {
         List<ServerPlayer> enabledFor = new ArrayList<>();

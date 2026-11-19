@@ -19,7 +19,6 @@ public abstract class MixinFoodData {
     @Shadow
     private float exhaustionLevel;
 
-    /// Keeps hunger full and discards exhaustion before it can drain saturation.
     @Inject(method = "tick(Lnet/minecraft/server/level/ServerPlayer;)V", at = @At("HEAD"))
     private void tick$injected(ServerPlayer player, CallbackInfo ci) {
         if (RuleChecks.isEnabledFor(player, ModGameRules.DISABLE_HUNGER)) {

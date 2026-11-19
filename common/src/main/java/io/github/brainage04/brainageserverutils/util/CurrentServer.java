@@ -2,7 +2,6 @@ package io.github.brainage04.brainageserverutils.util;
 
 import net.minecraft.server.MinecraftServer;
 
-/// Tracks the running server for code paths that have no level or entity to read gamerules from.
 public final class CurrentServer {
     private static volatile MinecraftServer server;
 

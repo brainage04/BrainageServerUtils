@@ -23,7 +23,6 @@ public final class MoreCommand {
         dispatcher.register(PlayerTargets.command("more", MoreCommand::execute));
     }
 
-    /// Fills each target's main-hand stack to its maximum stack size.
     private static int execute(CommandSourceStack source, Collection<ServerPlayer> targets) throws CommandSyntaxException {
         List<ServerPlayer> filled = new ArrayList<>();
         for (ServerPlayer player : targets) {

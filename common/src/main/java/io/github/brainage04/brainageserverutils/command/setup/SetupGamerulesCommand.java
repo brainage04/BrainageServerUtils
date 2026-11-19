@@ -12,16 +12,13 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.level.gamerules.GameRule;
 import net.minecraft.world.level.gamerules.GameRules;
 
-/// `/setupgamerules <survival|sandbox>`. Both presets set every rule they touch, so switching between them is
-/// lossless.
+/// Both presets set every rule they touch, so switching between them is lossless.
 public final class SetupGamerulesCommand {
     private static final List<GameRule<Boolean>> ENVIRONMENTAL_DAMAGE =
             List.of(GameRules.FALL_DAMAGE, GameRules.FIRE_DAMAGE, GameRules.DROWNING_DAMAGE, GameRules.FREEZE_DAMAGE);
 
     private enum Preset {
-        /// The server's usual rules, with vanilla damage and every BrainageServerUtils rule off.
         SURVIVAL(false),
-        /// SURVIVAL plus every BrainageServerUtils rule on and no fall, fire, drowning or freezing damage.
         SANDBOX(true);
 
         private final boolean sandbox;

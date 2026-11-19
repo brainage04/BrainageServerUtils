@@ -14,20 +14,13 @@ import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.ItemEnchantments;
 
-/// Replaces an item's enchantments with every applicable non-curse enchantment at its maximum level.
-///
-/// Mutually exclusive enchantments are resolved greedily in this order: explicitly preferred enchantments (in the
-/// order given), then configured rankings (most preferred first), then everything else by ID.
 public final class MaxEnchantment {
     private MaxEnchantment() {
     }
 
-    /// An enchantment left off because it conflicts with one that was applied. `decided` is false when neither a
-    /// ranking nor an explicit preference chose between the two, so the pick fell back to ID order.
     public record Conflict(Holder.Reference<Enchantment> skipped, Holder.Reference<Enchantment> chosen, boolean decided) {
     }
 
-    /// `inapplicable` lists explicitly preferred enchantments the item does not support.
     public record Result(
             List<Holder.Reference<Enchantment>> applied,
             List<Conflict> conflicts,
@@ -38,7 +31,6 @@ public final class MaxEnchantment {
     private record Rank(int ranking, int position) {
     }
 
-    /// Leaves the stack untouched when no enchantment applies to it.
     public static Result apply(
             ItemStack stack,
             HolderLookup.RegistryLookup<Enchantment> enchantments,

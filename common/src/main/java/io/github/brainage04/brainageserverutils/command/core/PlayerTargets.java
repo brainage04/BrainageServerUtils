@@ -11,7 +11,6 @@ import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 
-/// Shared shape for game-master commands that act on `[targets]`, defaulting to the executing player.
 public final class PlayerTargets {
     public static final String ARGUMENT = "targets";
 
@@ -35,7 +34,6 @@ public final class PlayerTargets {
         return List.of(context.getSource().getPlayerOrException());
     }
 
-    /// Reports "<verb> <player>" for one target or "<verb> <n> players" for several.
     public static void sendSuccess(CommandSourceStack source, String verb, Collection<ServerPlayer> affected) {
         if (affected.size() == 1) {
             ServerPlayer player = affected.iterator().next();
