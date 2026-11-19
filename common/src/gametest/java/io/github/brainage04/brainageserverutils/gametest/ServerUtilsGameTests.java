@@ -395,7 +395,6 @@ public final class ServerUtilsGameTests {
             assertTrue(fireworks != null && fireworks.flightDuration() == 3 && fireworks.explosions().isEmpty(),
                     "Expected flight-duration-3 rockets without explosions");
 
-            // A full inventory drops the kit at the player's feet (Prediction.SERVER_ONLY since 26.3).
             player.getInventory().clearContent();
             for (int slot = 0; slot < Inventory.INVENTORY_SIZE; slot++) {
                 player.getInventory().setItem(slot, new ItemStack(Items.DIRT, 64));
@@ -589,7 +588,7 @@ public final class ServerUtilsGameTests {
                     .withEntity(player).withSuppressedOutput(), "maxenchant");
             assertEquals(5, level(helper, Enchantments.SMITE, player.getMainHandItem()),
                     "Expected the previous version's rankings to decide the conflict");
-            // The mod start is where BSU writes the file; the server stop has nothing to save.
+            // The mod start is where BSU writes the file. The server stop has nothing to save.
             EnchantmentRankings.initialize(path.getParent());
             EnchantmentRankings.load();
             assertTrue(Files.readString(path).equals(previous),
@@ -667,7 +666,7 @@ public final class ServerUtilsGameTests {
         helper.succeed();
     }
 
-    /// An unreadable rankings file is reported and kept byte for byte; commands change nothing and no restart rewrites it.
+    /// An unreadable rankings file is reported and kept byte for byte. Commands change nothing and no restart rewrites it.
     public static void unreadableRankingsAreNotOverwritten(GameTestHelper helper) {
         Path path = EnchantmentRankings.path();
         byte[] original = null;
@@ -689,7 +688,7 @@ public final class ServerUtilsGameTests {
                         "Expected an unreadable file to leave the held item unchanged");
                 removePlayer(player);
                 player = null;
-                // The mod start is where BSU writes the file; the server stop has nothing to save.
+                // The mod start is where BSU writes the file. The server stop has nothing to save.
                 EnchantmentRankings.initialize(path.getParent());
                 assertRankingsRejected("Expected the file to stay unreadable after a restart: " + broken);
                 assertTrue(Files.readString(path).equals(broken),
@@ -717,6 +716,9 @@ public final class ServerUtilsGameTests {
     }
 
     private static void restoreRankings(Path path, byte[] original) {
+        if (original == null) {
+            return;
+        }
         try {
             Files.write(path, original);
             EnchantmentRankings.initialize(path.getParent());

@@ -116,13 +116,14 @@ public final class EnchantmentRankings {
     }
 
     private static String problem(JsonParseException exception) {
-        // Gson's syntax errors are the unreadable-file case; the decoder's own messages are configuration problems.
+        // Gson's syntax errors are the unreadable-file case. The decoder's own messages are
+        // configuration problems.
         return exception instanceof JsonSyntaxException
                 ? "could not be read: " + exception.getMessage()
                 : exception.getMessage();
     }
 
-    /// The stored document; the component name is the JSON field, so the file's format is unchanged.
+    /// The stored document. The component name is the JSON field.
     private record Document(List<List<String>> enchantment_rankings) {
     }
 
