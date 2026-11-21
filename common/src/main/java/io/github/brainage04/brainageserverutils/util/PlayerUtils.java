@@ -3,8 +3,7 @@ package io.github.brainage04.brainageserverutils.util;
 import net.minecraft.server.level.ServerPlayer;
 
 public final class PlayerUtils {
-    private PlayerUtils() {
-    }
+    private PlayerUtils() {}
 
     public static void updateHotbar(ServerPlayer player) {
         for (int i = 0; i < 9; i++) {

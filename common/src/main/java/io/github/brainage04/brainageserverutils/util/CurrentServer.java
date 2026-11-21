@@ -5,8 +5,7 @@ import net.minecraft.server.MinecraftServer;
 public final class CurrentServer {
     private static volatile MinecraftServer server;
 
-    private CurrentServer() {
-    }
+    private CurrentServer() {}
 
     public static MinecraftServer get() {
         return server;

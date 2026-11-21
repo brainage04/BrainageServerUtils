@@ -7,71 +7,85 @@ import net.minecraft.gametest.framework.GameTestHelper;
 public final class BrainageServerUtilsGameTest {
     @GameTest
     public void itemAndConsumptionRulesChangeRuntimeBehavior(GameTestHelper helper) {
-        ServerUtilsGameTests.runIsolated(helper, ServerUtilsGameTests::itemAndConsumptionRulesChangeRuntimeBehavior);
+        ServerUtilsGameTests.runIsolated(
+                helper, ServerUtilsGameTests::itemAndConsumptionRulesChangeRuntimeBehavior);
     }
 
     @GameTest
     public void durabilityRulePreventsItemDamage(GameTestHelper helper) {
-        ServerUtilsGameTests.runIsolated(helper, ServerUtilsGameTests::durabilityRulePreventsItemDamage);
+        ServerUtilsGameTests.runIsolated(
+                helper, ServerUtilsGameTests::durabilityRulePreventsItemDamage);
     }
 
     @GameTest
     public void bucketRulePreservesSourceWithoutDuplicatingResults(GameTestHelper helper) {
-        ServerUtilsGameTests.runIsolated(helper, ServerUtilsGameTests::bucketRulePreservesSourceWithoutDuplicatingResults);
+        ServerUtilsGameTests.runIsolated(
+                helper, ServerUtilsGameTests::bucketRulePreservesSourceWithoutDuplicatingResults);
     }
 
     @GameTest
     public void preservedAmmunitionCannotBePickedUp(GameTestHelper helper) {
-        ServerUtilsGameTests.runIsolated(helper, ServerUtilsGameTests::preservedAmmunitionCannotBePickedUp);
+        ServerUtilsGameTests.runIsolated(
+                helper, ServerUtilsGameTests::preservedAmmunitionCannotBePickedUp);
     }
 
     @GameTest
     public void scoreboardTracksHealthDeathsAndPlayerKills(GameTestHelper helper) {
-        ServerUtilsGameTests.runIsolated(helper, ServerUtilsGameTests::scoreboardTracksHealthDeathsAndPlayerKills);
+        ServerUtilsGameTests.runIsolated(
+                helper, ServerUtilsGameTests::scoreboardTracksHealthDeathsAndPlayerKills);
     }
 
     @GameTest
     public void maxEnchantResolvesConflictsByPreference(GameTestHelper helper) {
-        ServerUtilsGameTests.runIsolated(helper, ServerUtilsGameTests::maxEnchantResolvesConflictsByPreference);
+        ServerUtilsGameTests.runIsolated(
+                helper, ServerUtilsGameTests::maxEnchantResolvesConflictsByPreference);
     }
 
     @GameTest
     public void hungerAndCooldownRulesAffectPlayers(GameTestHelper helper) {
-        ServerUtilsGameTests.runIsolated(helper, ServerUtilsGameTests::hungerAndCooldownRulesAffectPlayers);
+        ServerUtilsGameTests.runIsolated(
+                helper, ServerUtilsGameTests::hungerAndCooldownRulesAffectPlayers);
     }
 
     @GameTest
     public void enchantingRulesWaiveLevelCostsAndCap(GameTestHelper helper) {
-        ServerUtilsGameTests.runIsolated(helper, ServerUtilsGameTests::enchantingRulesWaiveLevelCostsAndCap);
+        ServerUtilsGameTests.runIsolated(
+                helper, ServerUtilsGameTests::enchantingRulesWaiveLevelCostsAndCap);
     }
 
     @GameTest
     public void playerCommandsAffectTheirTargets(GameTestHelper helper) {
-        ServerUtilsGameTests.runIsolated(helper, ServerUtilsGameTests::playerCommandsAffectTheirTargets);
+        ServerUtilsGameTests.runIsolated(
+                helper, ServerUtilsGameTests::playerCommandsAffectTheirTargets);
     }
 
     @GameTest
     public void flightAndEnchantingAbilitiesFollowMenuAndGameMode(GameTestHelper helper) {
-        ServerUtilsGameTests.runIsolated(helper, ServerUtilsGameTests::flightAndEnchantingAbilitiesFollowMenuAndGameMode);
+        ServerUtilsGameTests.runIsolated(
+                helper, ServerUtilsGameTests::flightAndEnchantingAbilitiesFollowMenuAndGameMode);
     }
 
     @GameTest
     public void rankingsReloadAndRejectInvalidConfiguration(GameTestHelper helper) {
-        ServerUtilsGameTests.runIsolated(helper, ServerUtilsGameTests::rankingsReloadAndRejectInvalidConfiguration);
+        ServerUtilsGameTests.runIsolated(
+                helper, ServerUtilsGameTests::rankingsReloadAndRejectInvalidConfiguration);
     }
 
     @GameTest
     public void rankingsFromPreviousVersionLoad(GameTestHelper helper) {
-        ServerUtilsGameTests.runIsolated(helper, ServerUtilsGameTests::rankingsFromPreviousVersionLoad);
+        ServerUtilsGameTests.runIsolated(
+                helper, ServerUtilsGameTests::rankingsFromPreviousVersionLoad);
     }
 
     @GameTest
     public void defaultRankingsKeepPreviousFormat(GameTestHelper helper) {
-        ServerUtilsGameTests.runIsolated(helper, ServerUtilsGameTests::defaultRankingsKeepPreviousFormat);
+        ServerUtilsGameTests.runIsolated(
+                helper, ServerUtilsGameTests::defaultRankingsKeepPreviousFormat);
     }
 
     @GameTest
     public void unreadableRankingsAreNotOverwritten(GameTestHelper helper) {
-        ServerUtilsGameTests.runIsolated(helper, ServerUtilsGameTests::unreadableRankingsAreNotOverwritten);
+        ServerUtilsGameTests.runIsolated(
+                helper, ServerUtilsGameTests::unreadableRankingsAreNotOverwritten);
     }
 }

@@ -15,28 +15,25 @@ import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.ItemEnchantments;
 
 public final class MaxEnchantment {
-    private MaxEnchantment() {
-    }
+    private MaxEnchantment() {}
 
-    public record Conflict(Holder.Reference<Enchantment> skipped, Holder.Reference<Enchantment> chosen, boolean decided) {
-    }
+    public record Conflict(
+            Holder.Reference<Enchantment> skipped,
+            Holder.Reference<Enchantment> chosen,
+            boolean decided) {}
 
     public record Result(
             List<Holder.Reference<Enchantment>> applied,
             List<Conflict> conflicts,
-            List<Holder.Reference<Enchantment>> inapplicable
-    ) {
-    }
+            List<Holder.Reference<Enchantment>> inapplicable) {}
 
-    private record Rank(int ranking, int position) {
-    }
+    private record Rank(int ranking, int position) {}
 
     public static Result apply(
             ItemStack stack,
             HolderLookup.RegistryLookup<Enchantment> enchantments,
             List<List<Identifier>> rankings,
-            List<Holder.Reference<Enchantment>> preferred
-    ) {
+            List<Holder.Reference<Enchantment>> preferred) {
         Map<Identifier, Rank> ranks = new HashMap<>();
         for (int ranking = 0; ranking < rankings.size(); ranking++) {
             List<Identifier> entries = rankings.get(ranking);
@@ -44,19 +41,27 @@ public final class MaxEnchantment {
                 ranks.putIfAbsent(entries.get(position), new Rank(ranking, position));
             }
         }
-        List<Identifier> preferredIds = preferred.stream().map(holder -> holder.key().identifier()).toList();
+        List<Identifier> preferredIds =
+                preferred.stream().map(holder -> holder.key().identifier()).toList();
 
-        Comparator<Holder.Reference<Enchantment>> order = Comparator
-                .comparingInt((Holder.Reference<Enchantment> holder) -> tier(holder, preferredIds, ranks))
-                .thenComparingInt(holder -> position(holder, preferredIds, ranks))
-                .thenComparingInt(holder -> ranking(holder, ranks))
-                .thenComparing(holder -> holder.key().identifier().toString());
+        Comparator<Holder.Reference<Enchantment>> order =
+                Comparator.comparingInt(
+                                (Holder.Reference<Enchantment> holder) ->
+                                        tier(holder, preferredIds, ranks))
+                        .thenComparingInt(holder -> position(holder, preferredIds, ranks))
+                        .thenComparingInt(holder -> ranking(holder, ranks))
+                        .thenComparing(holder -> holder.key().identifier().toString());
 
-        List<Holder.Reference<Enchantment>> candidates = enchantments.listElements()
-                .filter(holder -> holder.value().canEnchant(stack))
-                .filter(holder -> !holder.is(EnchantmentTags.CURSE) || preferredIds.contains(holder.key().identifier()))
-                .sorted(order)
-                .toList();
+        List<Holder.Reference<Enchantment>> candidates =
+                enchantments
+                        .listElements()
+                        .filter(holder -> holder.value().canEnchant(stack))
+                        .filter(
+                                holder ->
+                                        !holder.is(EnchantmentTags.CURSE)
+                                                || preferredIds.contains(holder.key().identifier()))
+                        .sorted(order)
+                        .toList();
 
         List<Holder.Reference<Enchantment>> applied = new ArrayList<>();
         List<Conflict> conflicts = new ArrayList<>();
@@ -71,7 +76,11 @@ public final class MaxEnchantment {
             if (blocker == null) {
                 applied.add(candidate);
             } else {
-                conflicts.add(new Conflict(candidate, blocker, decided(candidate, blocker, preferredIds, ranks)));
+                conflicts.add(
+                        new Conflict(
+                                candidate,
+                                blocker,
+                                decided(candidate, blocker, preferredIds, ranks)));
             }
         }
 
@@ -83,13 +92,15 @@ public final class MaxEnchantment {
             EnchantmentHelper.setEnchantments(stack, result.toImmutable());
         }
 
-        List<Holder.Reference<Enchantment>> inapplicable = preferred.stream()
-                .filter(holder -> !holder.value().canEnchant(stack))
-                .toList();
+        List<Holder.Reference<Enchantment>> inapplicable =
+                preferred.stream().filter(holder -> !holder.value().canEnchant(stack)).toList();
         return new Result(List.copyOf(applied), List.copyOf(conflicts), inapplicable);
     }
 
-    private static int tier(Holder.Reference<Enchantment> holder, List<Identifier> preferredIds, Map<Identifier, Rank> ranks) {
+    private static int tier(
+            Holder.Reference<Enchantment> holder,
+            List<Identifier> preferredIds,
+            Map<Identifier, Rank> ranks) {
         Identifier id = holder.key().identifier();
         if (preferredIds.contains(id)) {
             return 0;
@@ -97,7 +108,10 @@ public final class MaxEnchantment {
         return ranks.containsKey(id) ? 1 : 2;
     }
 
-    private static int position(Holder.Reference<Enchantment> holder, List<Identifier> preferredIds, Map<Identifier, Rank> ranks) {
+    private static int position(
+            Holder.Reference<Enchantment> holder,
+            List<Identifier> preferredIds,
+            Map<Identifier, Rank> ranks) {
         Identifier id = holder.key().identifier();
         int preferredIndex = preferredIds.indexOf(id);
         if (preferredIndex >= 0) {
@@ -116,13 +130,14 @@ public final class MaxEnchantment {
             Holder.Reference<Enchantment> skipped,
             Holder.Reference<Enchantment> chosen,
             List<Identifier> preferredIds,
-            Map<Identifier, Rank> ranks
-    ) {
+            Map<Identifier, Rank> ranks) {
         if (preferredIds.contains(chosen.key().identifier())) {
             return true;
         }
         Rank skippedRank = ranks.get(skipped.key().identifier());
         Rank chosenRank = ranks.get(chosen.key().identifier());
-        return skippedRank != null && chosenRank != null && skippedRank.ranking() == chosenRank.ranking();
+        return skippedRank != null
+                && chosenRank != null
+                && skippedRank.ranking() == chosenRank.ranking();
     }
 }

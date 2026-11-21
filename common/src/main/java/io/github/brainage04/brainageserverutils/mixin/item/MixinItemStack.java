@@ -22,8 +22,7 @@ public abstract class MixinItemStack {
     @Inject(
             method = "consume(ILnet/minecraft/world/entity/LivingEntity;)V",
             at = @At("HEAD"),
-            cancellable = true
-    )
+            cancellable = true)
     private void consume$injected(int amount, LivingEntity entity, CallbackInfo ci) {
         if (this.getItem() instanceof BucketItem) {
             return;

@@ -27,23 +27,29 @@ import net.minecraft.world.item.enchantment.Enchantment;
 
 public final class KitCommand {
     private enum Kit {
-        NETHERITE(() -> stacks(
-                Items.NETHERITE_HELMET,
-                Items.NETHERITE_CHESTPLATE,
-                Items.NETHERITE_LEGGINGS,
-                Items.NETHERITE_BOOTS,
-                Items.NETHERITE_SWORD,
-                Items.NETHERITE_SPEAR,
-                Items.MACE,
-                Items.NETHERITE_PICKAXE,
-                Items.NETHERITE_AXE,
-                Items.NETHERITE_SHOVEL,
-                Items.SHIELD
-        )),
-        RANGED(() -> Stream.concat(
-                stacks(Items.BOW, Items.CROSSBOW, Items.TRIDENT).stream(),
-                Stream.of(new ItemStack(Items.ARROW, Items.ARROW.getDefaultMaxStackSize()))
-        ).toList()),
+        NETHERITE(
+                () ->
+                        stacks(
+                                Items.NETHERITE_HELMET,
+                                Items.NETHERITE_CHESTPLATE,
+                                Items.NETHERITE_LEGGINGS,
+                                Items.NETHERITE_BOOTS,
+                                Items.NETHERITE_SWORD,
+                                Items.NETHERITE_SPEAR,
+                                Items.MACE,
+                                Items.NETHERITE_PICKAXE,
+                                Items.NETHERITE_AXE,
+                                Items.NETHERITE_SHOVEL,
+                                Items.SHIELD)),
+        RANGED(
+                () ->
+                        Stream.concat(
+                                        stacks(Items.BOW, Items.CROSSBOW, Items.TRIDENT).stream(),
+                                        Stream.of(
+                                                new ItemStack(
+                                                        Items.ARROW,
+                                                        Items.ARROW.getDefaultMaxStackSize())))
+                                .toList()),
         ELYTRA(() -> List.of(new ItemStack(Items.ELYTRA), fireworks()));
 
         private final Supplier<List<ItemStack>> contents;
@@ -57,21 +63,24 @@ public final class KitCommand {
         }
     }
 
-    private KitCommand() {
-    }
+    private KitCommand() {}
 
     public static void initialize(CommandDispatcher<CommandSourceStack> dispatcher) {
-        LiteralArgumentBuilder<CommandSourceStack> root = Commands.literal("kit")
-                .requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS));
+        LiteralArgumentBuilder<CommandSourceStack> root =
+                Commands.literal("kit")
+                        .requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS));
         for (Kit kit : Kit.values()) {
-            root.then(PlayerTargets.command(kit.commandName(), (source, targets) -> execute(source, targets, kit)));
+            root.then(
+                    PlayerTargets.command(
+                            kit.commandName(), (source, targets) -> execute(source, targets, kit)));
         }
         dispatcher.register(root);
     }
 
     private static int execute(CommandSourceStack source, Collection<ServerPlayer> targets, Kit kit)
             throws CommandSyntaxException {
-        HolderLookup.RegistryLookup<Enchantment> enchantments = source.registryAccess().lookupOrThrow(Registries.ENCHANTMENT);
+        HolderLookup.RegistryLookup<Enchantment> enchantments =
+                source.registryAccess().lookupOrThrow(Registries.ENCHANTMENT);
         List<List<Identifier>> rankings = MaxEnchantCommand.loadRankings(enchantments);
         for (ServerPlayer player : targets) {
             for (ItemStack stack : kit.contents.get()) {
@@ -79,7 +88,8 @@ public final class KitCommand {
                     MaxEnchantment.apply(stack, enchantments, rankings, List.of());
                     stack.set(DataComponents.UNBREAKABLE, Unit.INSTANCE);
                 }
-                // The client predicted nothing: the server alone hands out the kit (as advancement rewards do).
+                // The client predicted nothing: the server alone hands out the kit (as advancement
+                // rewards do).
                 player.getInventory().placeItemBackInInventory(stack, Prediction.SERVER_ONLY);
             }
         }
@@ -92,7 +102,9 @@ public final class KitCommand {
     }
 
     private static ItemStack fireworks() {
-        ItemStack stack = new ItemStack(Items.FIREWORK_ROCKET, Items.FIREWORK_ROCKET.getDefaultMaxStackSize());
+        ItemStack stack =
+                new ItemStack(
+                        Items.FIREWORK_ROCKET, Items.FIREWORK_ROCKET.getDefaultMaxStackSize());
         stack.set(DataComponents.FIREWORKS, new Fireworks(3, List.of()));
         return stack;
     }
