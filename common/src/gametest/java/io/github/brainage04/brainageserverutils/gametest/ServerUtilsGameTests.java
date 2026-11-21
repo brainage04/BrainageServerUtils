@@ -1071,9 +1071,11 @@ public final class ServerUtilsGameTests {
         return enchantments(helper).getOrThrow(key);
     }
 
-    /// The stack's own enchantment component, as `EnchantmentHelper.getItemEnchantmentLevel` reads
-    /// it (EnchantmentHelper.java:50 in the 26.3 sources); NeoForge deprecates that method and
-    /// `ItemStack.getEnchantments` for reading the same data.
+    /// The stack's own `DataComponents.ENCHANTMENTS` component, which is what vanilla's
+    /// `EnchantmentHelper.getItemEnchantmentLevel` reads (EnchantmentHelper.java:49-52 in the 26.3
+    /// sources). NeoForge deprecates that method and `ItemStack.getEnchantments`; its replacement
+    /// routes through `ItemInstance.getEnchantmentLevel` and `GetEnchantmentLevelEvent`
+    /// (ItemInstanceExtension.java:56-59), which no listener here subscribes to.
     private static ItemEnchantments enchantmentsOf(ItemStack stack) {
         return stack.getOrDefault(DataComponents.ENCHANTMENTS, ItemEnchantments.EMPTY);
     }
